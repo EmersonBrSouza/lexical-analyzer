@@ -1,0 +1,30 @@
+module.exports = {
+  reserved: [
+    "var",
+    "function",
+    "const",
+    "typedef",
+    "struct",
+    "extends",
+    "procedure",
+    "start",
+    "return",
+    "if",
+    "else",
+    "then",
+    "while",
+    "read",
+    "print",
+    "int",
+    "real",
+    "boolean",
+    "string",
+    "true",
+    "false",
+    "global",
+    "local"
+  ],
+  numbers: new RegExp(/^(-)?(\s)*\d(\d)*(.\d(\d)*)?$/),
+  identifier: new RegExp(/^([a-z]|[A-Z])([\d|\w|_])*$/),
+  delimiters: [";", "="]
+};

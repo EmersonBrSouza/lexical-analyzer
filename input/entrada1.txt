@@ -1,0 +1,6 @@
+var c = 1;
+const b = 32;
+var variavel = c;
+var variavel1= c;
+var=c;
+var2=c;
