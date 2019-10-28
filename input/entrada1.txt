@@ -2,5 +2,10 @@ var c = 1;
 const b = 32;
 var variavel = c;
 var variavel1= c;
-var=c;
+var_=c;
+var|=d;
 var2=c;
+
+function bd () {
+
+}

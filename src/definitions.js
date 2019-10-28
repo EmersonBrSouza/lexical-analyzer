@@ -25,6 +25,11 @@ module.exports = {
     "local"
   ],
   numbers: new RegExp(/^(-)?(\s)*\d(\d)*(.\d(\d)*)?$/),
-  identifier: new RegExp(/^([a-z]|[A-Z])([\d|\w|_])*$/),
-  delimiters: [";", "="]
+  identifier: new RegExp(/^([a-z]|[A-Z])(\d|[a-z]|[A-Z]|_)*$/),
+  delimiters: [";", ",", "(", ")", "[", "]", "{", "}", "."],
+  arithmetic: ["+", "-", "*", "/", "++", "--"],
+  relational: ["!=", "==", "<", "<=", ">", ">=", "="],
+  logical: ["!", "&&", "||"],
+  //comments:,
+  //strings: new RegExp(/^"(\w\d)"$/),
 };

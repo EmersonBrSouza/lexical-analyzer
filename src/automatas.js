@@ -1,4 +1,4 @@
-const { reserved, delimiters, numbers, identifier } = require("./definitions");
+const { reserved, delimiters, numbers, identifier, relational, arithmetic, logical } = require("./definitions");
 
 var state = 0;
 
@@ -9,42 +9,61 @@ function declarationAutomata (line, lineNumber) {
 	let errors = [];
 
 	for (var i = 0; i < chunks.length; i++) {
-		
-		// console.log(`State ${state} | Chunk: ${chunks[i]}`);
 		function reset () {
 			state = 0;
 			raster = "";
 		}
-
+		
+		console.log(`State ${state} | Chunk: ${chunks[i]} | Raster: ${raster}`);
 		switch (state) {
 			case 0:
-				raster += chunks[i];
 				if (reserved.includes(raster)) {
 					state = 1;
+					break;
+				} else if (relational.includes(raster)) {
+					state = 3;
+					break;
+				} else {
+					raster += chunks[i];
 				}
-				break;
 			case 1: // Reconhece uma palavra reservada
-				if ((isSpace(chunks[i]) || isDelimiter(chunks[i])) && reserved.includes(raster)) {
+				if (isBreakpoint(chunks[i]) && reserved.includes(raster)) {
 					console.log(`Token ${raster} reconhecido`);
 					tokens.push({ token: "Reserved Word", lexeme: raster, line: lineNumber })
 					reset();
 				} else {
-					raster += chunks[i];
+					// raster += chunks[i];
 					state = 2;
 				}
 				break;
 			case 2: // Reconhece um identificador
-				if (isSpace(chunks[i]) || isDelimiter(chunks[i])) {
+				if (isBreakpoint(chunks[i])) {
 					if (identifier.test(raster)) {
 						console.log(`Token ${raster} reconhecido`);
 						tokens.push({ token: "Identifier", lexeme: raster, line: lineNumber })
 						reset();
+					} else if (relational.includes(raster)) {
+						state = 3;
 					} else {
-						console.log('Error')
+						errors.push({ error: "Error", lexeme: raster, line: lineNumber })
+						reset();
 					}
 				} else {
 					raster += chunks[i]
 				}
+				break;
+			case 3:
+				if (relational.includes(raster)) {
+					console.log(`Token ${raster} reconhecido`);
+					tokens.push({ token: "Relational", lexeme: raster, line: lineNumber })
+					reset();
+				} else {
+					errors.push({ error: "Error", lexeme: raster, line: lineNumber })
+					reset();
+				}
+				// else {
+				// 	raster += chunks[i]
+				// }
 				break;
 			default:
 				break;
@@ -54,12 +73,28 @@ function declarationAutomata (line, lineNumber) {
 	return { tokens, errors }
 }
 
+function isBreakpoint (char) {
+	return isSpace(char) || isDelimiter(char) || isRelational(char) || isArithmetic(char) || isLogical(char)
+}
+
 function isSpace(char) {
 	return char.charCodeAt(0) == 9 || char.charCodeAt(0) == 32;
 }
 
 function isDelimiter(char) {
 	return delimiters.includes(char);
+}
+
+function isRelational(char) {
+	return relational.includes(char);
+}
+
+function isArithmetic(char) {
+	return arithmetic.includes(char)
+}
+
+function isLogical(char) {
+	return logical.includes(char)
 }
 
 module.exports = { declarationAutomata };
