@@ -30,6 +30,8 @@ module.exports = {
   arithmetic: ["+", "-", "*", "/", "++", "--"],
   relational: ["!=", "==", "<", "<=", ">", ">=", "="],
   logical: ["!", "&&", "||"],
+  digit: new RegExp(/^\d$/),
+  letter: new RegExp(/^([a-z]|[A-Z])$/)
   //comments:,
   //strings: new RegExp(/^"(\w\d)"$/),
 };
