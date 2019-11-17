@@ -23,9 +23,8 @@ function declarationAutomata (line, lineNumber) {
 		console.log(`State ${state} | Chunk: ${chunks[currentPos]} | Raster: ${raster}`);
 		switch (state) {
 			case 0:
-				raster = chunks[currentPos];
+				raster = "";
 				if (isLetter(chunks[currentPos])) {
-					currentPos++;
 					state = 1;
 				} else if (isDelimiter(chunks[currentPos])) {
 					state = 2;
@@ -46,13 +45,16 @@ function declarationAutomata (line, lineNumber) {
 				if (isIdentifier(raster)) {
 					if (isReservedWord(raster)) {
 						tokens.push({ token: "Reserved Word", lexeme: raster, line: lineNumber });
-					} else {
+					} else if(isIdentifier(raster)){
 						tokens.push({ token: "Identifier", lexeme: raster, line: lineNumber });
+					} else {
+						errors.push({ error: "IdentifierBadFormatted", lexeme: raster, line: lineNumber }) //Should return error on "ca@da"
 					}
 				}
 				state = 0;
 				break;
 			case 2:
+				raster = chunks[currentPos];
 				if (isDelimiter(raster)) {
 					tokens.push({ token: "Delimiter", lexeme: raster, line: lineNumber });
 					currentPos++;
@@ -60,12 +62,14 @@ function declarationAutomata (line, lineNumber) {
 				}
 				break;
 			case 3:
+				raster = chunks[currentPos];
 				if (isArithmetic(raster)) {
 					tokens.push({ token: "Arithmetic", lexeme: raster, line: lineNumber });
 					currentPos++;
 					state = 0
 				}
 			case 4:
+				raster = chunks[currentPos];
 				if (isRelational(raster)) {
 					tokens.push({ token: "Relational", lexeme: raster, line: lineNumber });
 					currentPos++;

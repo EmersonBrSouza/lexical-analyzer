@@ -31,7 +31,8 @@ module.exports = {
   relational: ["!=", "==", "<", "<=", ">", ">=", "="],
   logical: ["!", "&&", "||"],
   digit: new RegExp(/^\d$/),
-  letter: new RegExp(/^([a-z]|[A-Z])$/)
+  letter: new RegExp(/^([a-z]|[A-Z])$/),
+  blockComment: new RegExp(/\/[*]([^*]|([*][^/]))*[*]+\//, 'g')
   //comments:,
   //strings: new RegExp(/^"(\w\d)"$/),
 };
