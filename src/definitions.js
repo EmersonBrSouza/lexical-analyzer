@@ -1,3 +1,7 @@
+/**
+ * This file contains the grammar definitions
+ * 
+ */
 module.exports = {
   reserved: [
     "var",
@@ -33,6 +37,5 @@ module.exports = {
   digit: new RegExp(/^\d$/),
   letter: new RegExp(/^([a-z]|[A-Z])$/),
   blockComment: new RegExp(/\/[*]([^*]|([*][^/]))*[*]+\//, 'g'),
-  //comments:,
   strings: new RegExp(/^"(?:[^"\\]|\\.)*"$/),
 };

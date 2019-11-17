@@ -1,3 +1,8 @@
+/**
+ * This file contains the lexical analyzer automata
+ * 
+ */
+
 const fs = require('fs');
 const path = require('path');
 const Transition = require('./transition');

@@ -1,3 +1,7 @@
+/**
+ * This file contains conditions to allow transitions
+ * 
+ */
 const Comparator = require('./comparator')
 
 class Transition {

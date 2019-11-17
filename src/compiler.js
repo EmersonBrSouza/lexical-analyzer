@@ -1,3 +1,8 @@
+/**
+ * This file contains the Compiler procedures to start
+ * 
+ */
+
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk').default;

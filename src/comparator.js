@@ -1,3 +1,7 @@
+/**
+ * This file contains some helpers to Compiler
+ * 
+ */
 const { letter, identifier, reserved, digit, numbers, blockComment, delimiters, strings } = require('./definitions');
 
 class Comparator {
