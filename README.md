@@ -1,6 +1,6 @@
 # lexical-analyzer
 
-# How to start
+### How to start
 
 - Clone this repo
 - Open the folder in terminal
