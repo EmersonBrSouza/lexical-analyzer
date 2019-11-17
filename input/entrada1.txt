@@ -1,9 +1,9 @@
-var oba * -10.8 zeb@ zeb_ o
-amora--
--- - 123
-// 2
+var oba * -10.8 _a zeb@ zeb_ o;
+amora++;
+-- - 123;
+// 2;
 
-/* Nossa cara 
+/* Nossa cara ;
   é linda
-  ÊEE FARAÓ
+  ÊEE FARAÓ;
 */

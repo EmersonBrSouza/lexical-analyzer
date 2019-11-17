@@ -35,6 +35,10 @@ class LexicalAnalyzer {
             this.state = 3;
           } else if (Transition.q0('q10', currentChar)) {
             this.state = 10;
+          } else if (Transition.q0('q16', currentChar)) {
+            this.state = 15;
+          } else if (Transition.q0('q17', currentChar)) {
+            this.state = 17;
           }
           else {
             if (Comparator.isBreakline(currentChar)) {
@@ -90,7 +94,7 @@ class LexicalAnalyzer {
           break;
         case 4:
           raster += currentChar;
-          tokens.push({ token: "Arithmetic Increment Operator", lexeme: raster, line: this.lineNumber, customCode: 9 });
+          tokens.push({ token: "Arithmetic Decrement Operator", lexeme: raster, line: this.lineNumber, customCode: 9 });
           this.currentPos++;
           this.state = 0;
           break;
@@ -105,7 +109,6 @@ class LexicalAnalyzer {
             this.state = 6
           } else {
             tokens.push({ token: "Number", lexeme: raster, line: this.lineNumber, customCode: 2 });
-            this.currentPos++;
             this.state = 0;
           }
           break;
@@ -229,6 +232,50 @@ class LexicalAnalyzer {
             tokens.push({ token: "Block Comment", lexeme: raster, line: this.lineNumber, customCode: 10 })
           } else {
             errors.push({ error: "WrongComment", lexeme: raster, line: this.lineNumber })
+          }
+          this.currentPos++;
+          this.state = 0;
+          break;
+        case 15:
+          raster += this.input[this.currentPos];
+          this.currentPos++;
+
+          if(Transition.q15("q15", this.input[this.currentPos])) {
+            tokens.push({ token: "Arithmetic Operator", lexeme: raster, line: this.lineNumber, customCode: 8 })
+            this.state = 0;
+          } else if(Transition.q15("q16", this.input[this.currentPos])) {
+            this.state = 16;
+          }
+          break;
+        case 16:
+          raster += this.input[this.currentPos];
+          tokens.push({ token: "Arithmetic Increment Operator", lexeme: raster, line: this.lineNumber, customCode: 9 });
+          this.currentPos++;
+          this.state = 0;
+          break;
+        case 17:
+          raster += currentChar;
+          console.log('ahfuahuehae')
+          if (Transition.q17("q17", raster)) {
+            if (raster == ";") {
+              tokens.push({ token: "Delimiter", lexeme: raster, line: this.lineNumber, customCode: 12 });
+            } else if (raster == ",") {
+              tokens.push({ token: "Delimiter", lexeme: raster, line: this.lineNumber, customCode: 13 });
+            } else if (raster == "(") {
+              tokens.push({ token: "Delimiter", lexeme: raster, line: this.lineNumber, customCode: 14 });
+            } else if (raster == ")") {
+              tokens.push({ token: "Delimiter", lexeme: raster, line: this.lineNumber, customCode: 15 });
+            } else if (raster == "[") {
+              tokens.push({ token: "Delimiter", lexeme: raster, line: this.lineNumber, customCode: 16 });
+            } else if (raster == "]") {
+              tokens.push({ token: "Delimiter", lexeme: raster, line: this.lineNumber, customCode: 17 });
+            } else if (raster == "{") {
+              tokens.push({ token: "Delimiter", lexeme: raster, line: this.lineNumber, customCode: 18 });
+            } else if (raster == "}") {
+              tokens.push({ token: "Delimiter", lexeme: raster, line: this.lineNumber, customCode: 19 });
+            } else if (raster == ".") {
+              tokens.push({ token: "Delimiter", lexeme: raster, line: this.lineNumber, customCode: 20 });
+            }
           }
           this.currentPos++;
           this.state = 0;

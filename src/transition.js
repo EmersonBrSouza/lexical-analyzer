@@ -10,11 +10,15 @@ class Transition {
       return args ===  "-"
     } else if (destiny == "q10") {
       return args ===  "/"
+    } else if (destiny == "q16") {
+      return args ===  "+"
+    } else if (destiny == "q17") {
+      return Comparator.isDelimiter(args);
     }
   }
 
   static q1 (destiny, args) {
-    const consumableChars = ['@', '$', "'", ':', '.', ',', '_', '^', '%', '?', '#', '\\']
+    const consumableChars = ['@', '$', "'", ':', '_', '^', '%', '?', '#', '\\']
     if (destiny == "q1") {
       return Comparator.isLetter(args) || Comparator.isDigit(args) || consumableChars.includes(args);
     }
@@ -54,7 +58,7 @@ class Transition {
 
   static q7 (destiny, args) {
     if (destiny == "q7") {
-      return Comparator.isDigit(args) || !Comparator.isLetter(args);
+      return !Comparator.isWhiteSpace(args) && !Comparator.isBreakline(args);
     }
   }
 
@@ -99,6 +103,20 @@ class Transition {
       return args === '*'
     } else if (destiny == "q14") {
       return args === '/';
+    }
+  }
+
+  static q15 (destiny, args) {
+    if (destiny == "q15") {
+      return args !== '+';
+    } else if (destiny == "q16") {
+      return args === '+'
+    }
+  }
+
+  static q17 (destiny, args) {
+    if (destiny == "q17") {
+      return Comparator.isDelimiter(args);
     }
   }
 }
