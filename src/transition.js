@@ -14,6 +14,18 @@ class Transition {
       return args ===  "+"
     } else if (destiny == "q17") {
       return Comparator.isDelimiter(args);
+    } else if (destiny == "q18") {
+      return args ===  "!"
+    } else if (destiny == "q20") {
+      return args ===  "="
+    } else if (destiny == "q21") {
+      return [">", "<"].includes(args);
+    } else if (destiny == "q22") {
+      return args ===  "&";
+    } else if (destiny == "q24") {
+      return args === "|"
+    } else if (destiny == "q26") {
+      return args === '"'
     }
   }
 
@@ -117,6 +129,92 @@ class Transition {
   static q17 (destiny, args) {
     if (destiny == "q17") {
       return Comparator.isDelimiter(args);
+    }
+  }
+
+  static q18 (destiny, args) {
+    if (destiny == "q18") {
+      return args !== "="
+    } else if (destiny == "q19") {
+      return args === "="
+    }
+  }
+
+  static q19 (destiny, args) {
+    if (destiny == "q19") {
+      return args === "="
+    }
+  }
+
+  static q20 (destiny, args) {
+    if (destiny == "q19") {
+      return args === "="
+    } else if (destiny == "q20") {
+      return args !== "="
+    }  
+  }
+
+  static q21 (destiny, args) {
+    if (destiny == "q19") {
+      return args === "="
+    } else if (destiny == "q21") {
+      return args !== "="
+    }  
+  }
+
+  static q22 (destiny, args) {
+    if (destiny == "q22") {
+      return args !== "&"
+    } else if (destiny == "q23") {
+      return args === "&"
+    } 
+  }
+
+  static q23 (destiny, args) {
+    if (destiny == "q23") {
+      return args === "&"
+    } 
+  }
+
+  static q24 (destiny, args) {
+    if (destiny == "q24") {
+      return args !== "|"
+    } else if (destiny == "q25") {
+      return args === "|"
+    }  
+  }
+
+  static q25 (destiny, args) {
+    if (destiny == "q25") {
+      return args === "|"
+    }
+  }
+
+  static q26 (destiny, args) {
+    if (destiny == "q26") {
+      return !Comparator.isBreakline(args) && args !== '\\' && args !== '"'
+    } else if (destiny == "q27") {
+      return args === '\\'
+    } else if (destiny == "q29") {
+      return args === '"'
+    }
+  }
+
+  static q27 (destiny, args) {
+    if (destiny == "q26") {
+      return args !== '\\' && args !== '"'
+    } else if (destiny == "q27") {
+      return args === '\\'
+    } else if (destiny == "q28") {
+      return args === '"'
+    }
+  }
+
+  static q28 (destiny, args) {
+    if (destiny == "q26") {
+      return args !== '"' && args !== '\n'
+    } else if (destiny == "q29") {
+      return args === '"'
     }
   }
 }

@@ -1,0 +1,11 @@
+var c@ !1;+
+
+d === w
+
+d >= w;
+if (w > d) {
+  c++;
+}&&a&||"a\"
+
+"uma string
+incorreta" 

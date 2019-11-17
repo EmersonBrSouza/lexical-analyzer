@@ -32,7 +32,7 @@ module.exports = {
   logical: ["!", "&&", "||"],
   digit: new RegExp(/^\d$/),
   letter: new RegExp(/^([a-z]|[A-Z])$/),
-  blockComment: new RegExp(/\/[*]([^*]|([*][^/]))*[*]+\//, 'g')
+  blockComment: new RegExp(/\/[*]([^*]|([*][^/]))*[*]+\//, 'g'),
   //comments:,
-  //strings: new RegExp(/^"(\w\d)"$/),
+  strings: new RegExp(/^"(?:[^"\\]|\\.)*"$/),
 };

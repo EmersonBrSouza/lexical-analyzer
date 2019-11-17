@@ -1,4 +1,4 @@
-const { letter, identifier, reserved, digit, numbers, blockComment, delimiters } = require('./definitions');
+const { letter, identifier, reserved, digit, numbers, blockComment, delimiters, strings } = require('./definitions');
 
 class Comparator {
   static isLetter (char) {
@@ -27,6 +27,10 @@ class Comparator {
 
   static isValidNumber (string) {
     return numbers.test(string)
+  }
+
+  static isValidString (string) {
+    return strings.test(string);
   }
 
   static isBlockComment (string) {

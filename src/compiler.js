@@ -21,7 +21,7 @@ class Compiler {
         console.log(`${chalk.red("Entrada Inválida")} | O arquivo ${file.name} não pode ser lido.`)
       } else {
         const inputFile = fs.readFileSync(path.resolve(inputPath, file.name), "utf-8")
-        const lexicalAnalyzer = new LexicalAnalyzer(inputFile);
+        const lexicalAnalyzer = new LexicalAnalyzer(inputFile, file.name);
 
         console.log(chalk.yellow(`\nAnalisando ${file.name}`));
         lexicalAnalyzer.startAnalisis();

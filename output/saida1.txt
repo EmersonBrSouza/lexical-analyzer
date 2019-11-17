@@ -1,0 +1,23 @@
+Lista de Tokens:
+1 var Reserved Word
+1 oba Identifier
+1 * Arithmetic Operator
+1 -10.8 Number
+1 a Identifier
+1 zeb_ Identifier
+1 o Identifier
+1 ; Delimiter
+2 amora Identifier
+2 ++ Arithmetic Increment Operator
+2 ; Delimiter
+3 -- Arithmetic Decrement Operator
+3 -123 Number
+3 ; Delimiter
+4 // 2; Line Comment
+6 /* Nossa cara ;
+  é linda
+  ÊEE FARAÓ;
+*/ Block Comment
+
+Lista de Erros:
+1 zeb@ BadlyFormattedIdentifier
