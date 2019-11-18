@@ -13,10 +13,10 @@ Lista de Tokens:
 3 -- Arithmetic Decrement Operator
 3 -123 Number
 3 ; Delimiter
-4 // 2; Line Comment
-6 /* Nossa cara ;
-  é linda
-  ÊEE FARAÓ;
+4 // 2; Line Comment
+6 /* Este é um comentário ;
+  de múltiplas linhas
+  E tudo mais
 */ Block Comment
 
 Lista de Erros:

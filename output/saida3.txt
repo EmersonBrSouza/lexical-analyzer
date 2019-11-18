@@ -30,7 +30,6 @@ Lista de Tokens:
 Lista de Erros:
 1 c@ BadlyFormattedIdentifier
 8 & BadlyFormattedOperator
-8 "a\"
- BadlyFormattedString
-9 "uma string BadlyFormattedString
+8 "a\" BadlyFormattedString
+9 "uma string BadlyFormattedString
 9 "  BadlyFormattedString

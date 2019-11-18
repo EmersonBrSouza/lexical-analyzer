@@ -3,7 +3,7 @@ amora++;
 -- - 123;
 // 2;
 
-/* Nossa cara ;
-  é linda
-  ÊEE FARAÓ;
+/* Este é um comentário ;
+  de múltiplas linhas
+  E tudo mais
 */

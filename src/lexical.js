@@ -1,6 +1,7 @@
 /**
  * This file contains the lexical analyzer automata
  * 
+ * See Automata.jpeg
  */
 
 const fs = require('fs');
@@ -10,7 +11,7 @@ const Comparator = require('./comparator');
 
 class LexicalAnalyzer {
 
-  constructor (input, filename) {
+  constructor(input, filename) {
     if (!input) {
       throw new Error("O analisador léxico precisa de um arquivo válido")
     }
@@ -23,18 +24,18 @@ class LexicalAnalyzer {
     this.tokens = [];
   }
 
-  startAnalisis() {
+  startAnalisis () {
     let raster = "";
 
     do {
       let currentChar = this.input[this.currentPos]
-      console.log(`state ${this.state} | Chunk: ${currentChar} | Raster: ${raster}`);
+
       switch (this.state) {
         case 0:
           raster = "";
           if (Transition.q0('q1', currentChar)) {
             this.state = 1;
-          } else if (Transition.q0('q2',currentChar)) {
+          } else if (Transition.q0('q2', currentChar)) {
             this.state = 2;
           } else if (Transition.q0('q3', currentChar)) {
             this.state = 3;
@@ -94,7 +95,7 @@ class LexicalAnalyzer {
           raster += currentChar;
           this.currentPos++;
           currentChar = this.input[this.currentPos];
-          
+
           if (Transition.q3('q3', currentChar)) {
             this.tokens.push({ token: "Arithmetic Operator", lexeme: raster, line: this.lineNumber, customCode: 8 })
             this.state = 0;
@@ -104,7 +105,7 @@ class LexicalAnalyzer {
             this.state = 5;
           } else if (Transition.q3('q8', currentChar)) {
             this.state = 8;
-          } else if(this.isEndOfFile()) {
+          } else if (this.isEndOfFile()) {
             this.tokens.push({ token: "Arithmetic Operator", lexeme: raster, line: this.lineNumber, customCode: 8 })
             this.state = 0;
           }
@@ -161,7 +162,7 @@ class LexicalAnalyzer {
           while (Transition.q8('q8', this.input[this.currentPos])) {
             this.currentPos++;
           }
-          if(Transition.q8('q5', this.input[this.currentPos])) {
+          if (Transition.q8('q5', this.input[this.currentPos])) {
             this.state = 5;
           } else if (Transition.q8('q9', this.input[this.currentPos]) || this.isEndOfFile()) {
             this.state = 9;
@@ -185,7 +186,7 @@ class LexicalAnalyzer {
           }
           break;
         case 11:
-          while(Transition.q11('q11', this.input[this.currentPos])) {
+          while (Transition.q11('q11', this.input[this.currentPos])) {
             currentChar = this.input[this.currentPos]
             raster += currentChar;
             if (!this.isEndOfFile()) {
@@ -203,7 +204,7 @@ class LexicalAnalyzer {
           this.state = 0;
           break;
         case 12:
-          while(Transition.q12('q12', this.input[this.currentPos])) {
+          while (Transition.q12('q12', this.input[this.currentPos])) {
             currentChar = this.input[this.currentPos]
             raster += currentChar;
 
@@ -223,7 +224,7 @@ class LexicalAnalyzer {
           }
           break;
         case 13:
-          while(Transition.q13('q13', this.input[this.currentPos])) {
+          while (Transition.q13('q13', this.input[this.currentPos])) {
             currentChar = this.input[this.currentPos]
             raster += currentChar;
             if (!this.isEndOfFile()) {
@@ -257,10 +258,10 @@ class LexicalAnalyzer {
           raster += this.input[this.currentPos];
           this.currentPos++;
 
-          if(Transition.q15("q15", this.input[this.currentPos])) {
+          if (Transition.q15("q15", this.input[this.currentPos])) {
             this.tokens.push({ token: "Arithmetic Operator", lexeme: raster, line: this.lineNumber, customCode: 8 })
             this.state = 0;
-          } else if(Transition.q15("q16", this.input[this.currentPos])) {
+          } else if (Transition.q15("q16", this.input[this.currentPos])) {
             this.state = 16;
           }
           break;
@@ -299,7 +300,7 @@ class LexicalAnalyzer {
         case 18:
           raster += currentChar;
           this.currentPos++;
-          
+
           if (Transition.q18('q18', this.input[this.currentPos])) {
             this.tokens.push({ token: "Denial Logical Operator", lexeme: raster, line: this.lineNumber, customCode: 5 });
             this.state = 0;
@@ -313,12 +314,12 @@ class LexicalAnalyzer {
             this.tokens.push({ token: "Relational Operator", lexeme: raster, line: this.lineNumber, customCode: 6 });
             this.currentPos++;
             this.state = 0;
-          } 
+          }
           break;
         case 20:
           raster += currentChar;
           this.currentPos++;
-          
+
           if (Transition.q20('q20', this.input[this.currentPos])) {
             this.tokens.push({ token: "Attribuition Operator", lexeme: raster, line: this.lineNumber, customCode: 7 });
             this.state = 0;
@@ -329,7 +330,7 @@ class LexicalAnalyzer {
         case 21:
           raster += currentChar;
           this.currentPos++;
-          
+
           if (Transition.q21('q21', this.input[this.currentPos])) {
             this.tokens.push({ token: "Relational Operator", lexeme: raster, line: this.lineNumber, customCode: 6 });
             this.state = 0;
@@ -340,7 +341,7 @@ class LexicalAnalyzer {
         case 22:
           raster += currentChar;
           this.currentPos++;
-          
+
           if (Transition.q22('q22', this.input[this.currentPos])) {
             this.errors.push({ error: "BadlyFormattedOperator", lexeme: raster, line: this.lineNumber });
             this.state = 0;
@@ -361,7 +362,7 @@ class LexicalAnalyzer {
         case 24:
           raster += currentChar;
           this.currentPos++;
-          
+
           if (Transition.q24('q24', this.input[this.currentPos])) {
             this.errors.push({ error: "BadlyFormattedOperator", lexeme: raster, line: this.lineNumber });
             this.state = 0;
@@ -383,7 +384,7 @@ class LexicalAnalyzer {
           raster += this.input[this.currentPos];
           this.currentPos++;
 
-          while(Transition.q26('q26', this.input[this.currentPos])) {
+          while (Transition.q26('q26', this.input[this.currentPos])) {
             currentChar = this.input[this.currentPos];
             raster += currentChar;
             if (!this.isEndOfFile()) {
@@ -401,10 +402,10 @@ class LexicalAnalyzer {
             this.state = 27;
           } else if (Transition.q26('q29', this.input[this.currentPos])) {
             this.state = 29;
-          } 
+          }
           break;
-        case 27:         
-          while(Transition.q27('q27', this.input[this.currentPos])) {
+        case 27:
+          while (Transition.q27('q27', this.input[this.currentPos])) {
             currentChar = this.input[this.currentPos];
             raster += currentChar;
             if (!this.isEndOfFile()) {
@@ -413,7 +414,7 @@ class LexicalAnalyzer {
               break;
             }
           }
-          
+
           if (Transition.q27('q26', this.input[this.currentPos])) {
             this.state = 26;
           } else if (Transition.q27('q28', this.input[this.currentPos])) {
@@ -427,7 +428,7 @@ class LexicalAnalyzer {
         case 28:
           raster += this.input[this.currentPos];
 
-          
+
           if (this.isEndOfFile() || Comparator.isBreakline(this.input[this.currentPos])) {
             this.errors.push({ error: "BadlyFormattedString", lexeme: raster, line: this.lineNumber })
             this.currentPos++;
@@ -436,15 +437,15 @@ class LexicalAnalyzer {
             this.currentPos++;
             if (Transition.q28('q26', this.input[this.currentPos])) {
               this.state = 26;
-            } else if (Transition.q28('q29', this.input[this.currentPos])){
+            } else if (Transition.q28('q29', this.input[this.currentPos])) {
               this.state = 29;
-            } 
+            }
           }
           break;
         case 29:
           raster += this.input[this.currentPos];
 
-          if(Comparator.isValidString(raster)) {
+          if (Comparator.isValidString(raster)) {
             this.tokens.push({ token: "String", lexeme: raster, line: this.lineNumber, customCode: 11 });
           } else {
             this.errors.push({ error: "BadlyFormattedString", lexeme: raster, line: this.lineNumber })
