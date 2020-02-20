@@ -8,6 +8,7 @@ const path = require('path');
 const chalk = require('chalk').default;
 
 const LexicalAnalyzer = require('./lexical');
+const SyntaticalAnalyzer = require('./syntatical');
 const inputPath = path.resolve("input");
 const outputPath = path.resolve("output");
 const fileRegex = new RegExp(/entrada(\d+)(.txt)/, "g");
@@ -29,10 +30,15 @@ class Compiler {
         const lexicalAnalyzer = new LexicalAnalyzer(inputFile, file.name);
 
         console.log(chalk.yellow(`\nAnalisando ${file.name}`));
-        lexicalAnalyzer.startAnalisis();
+        let result = lexicalAnalyzer.startAnalisis();
+        this._startSyntaticalAnalisys(result.tokens);
       }
     });
+  }
 
+  _startSyntaticalAnalisys (tokens) {
+    const syntaticalAnalyzer = new SyntaticalAnalyzer(tokens);
+    syntaticalAnalyzer.start();
   }
 
   clearOutputCache () {

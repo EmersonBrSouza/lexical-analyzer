@@ -1,0 +1,11 @@
+Lista de Tokens:
+1 const Reserved Word
+1 { Delimiter
+2 real Reserved Word
+2 b Identifier
+2 = Attribuition Operator
+2 -2 Number
+2 ; Delimiter
+3 } Delimiter
+
+Lista de Erros:

@@ -458,10 +458,15 @@ class LexicalAnalyzer {
       }
     } while (this.currentPos < this.input.length);
 
-    console.table(this.tokens)
-    console.table(this.errors)
+    // console.table(this.tokens)
+    // console.table(this.errors)
 
     this.writeFile();
+
+    return {
+      tokens: this.tokens,
+      errors: this.errors
+    }
   }
 
   isEndOfFile () {
