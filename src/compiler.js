@@ -38,7 +38,7 @@ class Compiler {
 
   _startSyntaticalAnalisys (tokens) {
     const syntaticalAnalyzer = new SyntaticalAnalyzer(tokens);
-    syntaticalAnalyzer.start();
+    syntaticalAnalyzer.startAnalisys();
   }
 
   clearOutputCache () {

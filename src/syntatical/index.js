@@ -12,7 +12,7 @@ class SyntaticalAnalyzer {
   }
 
 
-  start () {
+  startAnalisys () {
     console.log(this.tokens);
     this.const();
     this.struct();
@@ -162,6 +162,7 @@ class SyntaticalAnalyzer {
       this.typeStruct();
     }
   }
+
   /**
    * Var Methods
    */
@@ -212,7 +213,6 @@ class SyntaticalAnalyzer {
     if (this.currentLexeme == '}') {
       this.nextToken();
       console.log('fechou var');
-      
     } else {
       this.typeVar();
     }
@@ -392,7 +392,7 @@ class SyntaticalAnalyzer {
             this.body();
             this.nextToken();
             if (this.currentLexeme == '}') {
-
+              this.nextToken();
             }
           }
         }
@@ -401,15 +401,132 @@ class SyntaticalAnalyzer {
   }
 
   conditional () {
-    console.log('while');
+    if(this.currentLexeme == 'if') {
+      this.nextToken();
+      if (this.currentLexeme == '(') {
+        this.expressionLogicRelational();
+        if (this.currentLexeme == ')') {
+          this.nextToken();
+          if (this.currentLexeme == 'then') {
+            this.nextToken();
+            if (this.currentLexeme == '{') {
+              this.nextToken();
+              this.body();
+              this.nextToken();
+              if (this.currentLexeme == '}') {
+                this.conditionalEnd();
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
+  conditionalEnd () {
+    if (this.currentLexeme == 'else') {
+      this.nextToken()
+      if (this.currentLexeme == '{') {
+        this.nextToken()
+        this.body()
+        if (this.currentLexeme == '}') {
+          this.nextToken()
+        }
+      }
+    }
+  }
+  
   read () {
-    console.log('while');
+    if (this.currentLexeme == 'read') {
+      this.nextToken()
+      if (this.currentLexeme == '(') {
+        this.nextToken()
+        this.read1()
+      }
+    }
+  }
+
+  read1 () {
+    if (['String', 'Number'].includes(this.currentToken)) {
+      this.nextToken()
+      this.auxRead()
+    } else {
+      this.identifierWithoutFunction()
+      this.auxRead()
+    }
+  }
+
+  auxRead () {
+    if (this.currentLexeme == ',') {
+      this.nextToken()
+      this.print1()
+    } else {
+      this.printEnd();
+    }
+  }
+
+  readEnd () {
+    if (this.currentLexeme == ')') {
+      this.nextToken()
+      if (this.currentLexeme == ';') {
+        this.nextToken()
+      }
+    }
   }
 
   print () {
-    console.log('while');
+    if (this.currentLexeme == 'print') {
+      this.nextToken()
+      if (this.currentLexeme == '(') {
+        this.nextToken()
+        this.print1()
+      }
+    }
+  }
+
+  print1 () {
+    if (['String', 'Number'].includes(this.currentToken)) {
+      this.nextToken()
+      this.auxPrint()
+    } else {
+      this.identifier()
+    }
+  }
+
+  auxPrint () {
+    if (this.currentLexeme == ',') {
+      this.nextToken()
+      this.print1()
+    } else {
+      this.printEnd();
+    }
+  }
+
+  printEnd () {
+    if (this.currentLexeme == ')') {
+      this.nextToken()
+      if (this.currentLexeme == ';') {
+        this.nextToken()
+      }
+    }
+  }
+
+  start () {
+    if (this.currentLexeme == 'start') {
+      this.nextToken()
+      if (this.currentLexeme == '(') {
+        this.nextToken()
+        if (this.currentLexeme == ')') {
+          this.nextToken()
+          if (this.currentLexeme == '{') {
+            this.body()
+            if (this.currentLexeme == '}') {
+              this.nextToken()
+            }
+          }
+        }
+      }
+    }
   }
 
 }

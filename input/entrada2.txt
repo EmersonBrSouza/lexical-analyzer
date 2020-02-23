@@ -20,11 +20,14 @@ function int opa (int a, real b) {
   var {
     int b = c;
   }
-  while
+  
+  while {
+    print(aa)
+  }
 }
 
 procedure b (int a) {
-  
+
 }
 
 
