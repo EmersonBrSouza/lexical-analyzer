@@ -1,216 +1,77 @@
 Lista de Tokens:
-1 include Identifier
-1 < Relational Operator
-1 stdio Identifier
-1 . Delimiter
-1 h Identifier
-1 > Relational Operator
-2 include Identifier
-2 < Relational Operator
-2 stdlib Identifier
-2 . Delimiter
-2 h Identifier
-2 > Relational Operator
-4 void Identifier
-4 swap Identifier
-4 ( Delimiter
-4 int Reserved Word
-4 * Arithmetic Operator
-4 a Identifier
-4 , Delimiter
-4 int Reserved Word
-4 * Arithmetic Operator
-4 b Identifier
-4 ) Delimiter
-4 { Delimiter
-5 int Reserved Word
-5 temp Identifier
-5 = Attribuition Operator
-5 * Arithmetic Operator
-5 a Identifier
-5 ; Delimiter
-6 * Arithmetic Operator
-6 a Identifier
-6 = Attribuition Operator
-6 * Arithmetic Operator
-6 b Identifier
-6 ; Delimiter
-7 * Arithmetic Operator
+1 const Reserved Word
+1 { Delimiter
+2 int Reserved Word
+2 a Identifier
+2 -2 Number
+2 ; Delimiter
+3 string Reserved Word
+3 c Identifier
+3 "ola" String
+3 ; Delimiter
+4 } Delimiter
+6 typedef Reserved Word
+6 struct Reserved Word
+6 o Identifier
+6 { Delimiter
+7 int Reserved Word
 7 b Identifier
-7 = Attribuition Operator
-7 temp Identifier
 7 ; Delimiter
 8 } Delimiter
-9 void Identifier
-9 bubbleSort Identifier
-9 ( Delimiter
-9 int Reserved Word
-9 * Arithmetic Operator
-9 v Identifier
-9 , Delimiter
-9 int Reserved Word
-9 n Identifier
-9 ) Delimiter
-9 { Delimiter
-10 if Reserved Word
-10 ( Delimiter
-10 n Identifier
-10 < Relational Operator
-10 ) Delimiter
-10 return Reserved Word
-10 ; Delimiter
-12 for Identifier
-12 ( Delimiter
+10 var Reserved Word
+10 { Delimiter
+11 int Reserved Word
+11 c Identifier
+11 = Attribuition Operator
+11 -2 Number
+11 ; Delimiter
 12 int Reserved Word
-12 i Identifier
-12 = Attribuition Operator
+12 a Identifier
 12 ; Delimiter
-12 i Identifier
-12 < Relational Operator
-12 n Identifier
-12 ; Delimiter
-12 i Identifier
-12 ++ Arithmetic Increment Operator
-12 ) Delimiter
-13 if Reserved Word
-13 ( Delimiter
-13 v Identifier
+13 int Reserved Word
+13 a Identifier
 13 [ Delimiter
-13 i Identifier
+13 b Identifier
 13 ] Delimiter
-13 > Relational Operator
-13 v Identifier
-13 [ Delimiter
-13 i Identifier
-13 + Arithmetic Operator
-13 ] Delimiter
-13 ) Delimiter
-14 swap Identifier
-14 ( Delimiter
-14 v Identifier
+13 ; Delimiter
+14 int Reserved Word
+14 b Identifier
 14 [ Delimiter
-14 i Identifier
+14 c Identifier
 14 ] Delimiter
-14 , Delimiter
-14 v Identifier
 14 [ Delimiter
-14 i Identifier
-14 + Arithmetic Operator
+14 a Identifier
 14 ] Delimiter
-14 ) Delimiter
 14 ; Delimiter
-15 bubbleSort Identifier
-15 ( Delimiter
-15 v Identifier
-15 , Delimiter
-15 n Identifier
-15 -1 Number
-15 ) Delimiter
-15 ; Delimiter
-16 } Delimiter
-18 / Arithmetic Operator
-18 Isto Identifier
-18 seria Identifier
-18 um Identifier
-18 coment Identifier
-18 rio Identifier
-18 de Identifier
-18 linha Identifier
-18 . Delimiter
-18 . Delimiter
-18 . Delimiter
-19 int Reserved Word
-19 main Identifier
-19 ( Delimiter
-19 ) Delimiter
-19 { Delimiter
-20 int Reserved Word
-20 tam Identifier
-20 , Delimiter
-20 i Identifier
-20 , Delimiter
-20 * Arithmetic Operator
-20 * Arithmetic Operator
-20 v Identifier
-20 ; Delimiter
-21 scanf Identifier
-21 ( Delimiter
-21 v Identifier
+15 } Delimiter
+18 function Reserved Word
+18 int Reserved Word
+18 opa Identifier
+18 ( Delimiter
+18 int Reserved Word
+18 a Identifier
+18 , Delimiter
+18 real Reserved Word
+18 b Identifier
+18 ) Delimiter
+18 { Delimiter
+20 var Reserved Word
+20 { Delimiter
+21 int Reserved Word
+21 b Identifier
 21 = Attribuition Operator
-21 ( Delimiter
-21 int Reserved Word
-21 * Arithmetic Operator
-21 ) Delimiter
-21 malloc Identifier
-21 ( Delimiter
-21 tam Identifier
-21 * Arithmetic Operator
-21 sizeof Identifier
-21 ( Delimiter
-21 int Reserved Word
-21 ) Delimiter
-21 ) Delimiter
+21 c Identifier
 21 ; Delimiter
-22 for Identifier
-22 ( Delimiter
-22 i Identifier
-22 = Attribuition Operator
-22 ; Delimiter
-22 i Identifier
-22 < Relational Operator
-22 tam Identifier
-22 ; Delimiter
-22 i Identifier
-22 ++ Arithmetic Increment Operator
-22 ) Delimiter
-22 scanf Identifier
-22 ( Delimiter
-22 "%d" String
-22 , Delimiter
-22 v Identifier
-22 [ Delimiter
-22 i Identifier
-22 ] Delimiter
-22 ) Delimiter
-22 ; Delimiter
-23 bubbleSort Identifier
-23 ( Delimiter
-23 v Identifier
-23 , Delimiter
-23 tam Identifier
-23 -1 Number
-23 ) Delimiter
-23 ; Delimiter
-24 for Identifier
-24 ( Delimiter
-24 i Identifier
-24 = Attribuition Operator
-24 ; Delimiter
-24 i Identifier
-24 < Relational Operator
-24 tam Identifier
-24 ; Delimiter
-24 i Identifier
-24 ++ Arithmetic Increment Operator
-24 ) Delimiter
-24 printf Identifier
-24 ( Delimiter
-24 "%d " String
-24 , Delimiter
-24 v Identifier
-24 [ Delimiter
-24 i Identifier
-24 ] Delimiter
-24 ) Delimiter
-24 ; Delimiter
-25 return Reserved Word
-25 ; Delimiter
-26 } Delimiter
+22 } Delimiter
+23 while Reserved Word
+24 } Delimiter
+26 procedure Reserved Word
+26 b Identifier
+26 ( Delimiter
+26 int Reserved Word
+26 a Identifier
+26 ) Delimiter
+26 { Delimiter
+28 } Delimiter
 
 Lista de Erros:
-14 & BadlyFormattedOperator
-14 & BadlyFormattedOperator
-14 & BadlyFormattedOperator
-21 "%d,&tam); BadlyFormattedString
-22 & BadlyFormattedOperator
-27 /* Alerta! Este � um coment�rio de bloco sem fechamento :O WrongComment
