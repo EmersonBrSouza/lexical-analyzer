@@ -1,172 +1,99 @@
+const Definitions = require('./syntax_definitions');
+
 class SyntaticalAnalyzer {
 
-  
-  generateSets () {
-    this.firstSet["PROCEDURE"] = ["procedure"];
-    this.firstSet["PARAMETER"] = ["int", "boolean", "string", "real", "Id"];
-    this.firstSet["PARAM1"] = [",", ")"];
-    this.firstSet["PARAM2"] = ["["];
-    this.firstSet["PARAM3"] = ["["];
-    this.firstSet["F2"] = ["{"];
-    this.firstSet["CONST"] = ["const"];
-    this.firstSet["TIPO_CONST"] = ["int", "boolean", "string", "real", "Id"];
-    this.firstSet["VECTOR_INDEX"] = ["IntPos", "local", "global","Id"];
-    this.firstSet["SCOPE"] = ["local", "global"];
-    this.firstSet["PIdentificadorSemFuncao"] = ["PEscopo", "Id"];
-    this.firstSet["PExpressaoAritmetica"] = ["PT", "PIdentificadorAritmetico", "++", "--"];
-    this.firstSet["PE2"] = ["+", "-"];
-    this.firstSet["PT"] = ["PF"];
-    this.firstSet["PT2"] = ["*",  "/"];
-    this.firstSet["PF"] = ["(", "Numero"];
-    this.firstSet["ARITHMETIC_IDENTIFIER"] = ["PEscopo", "Id"];
-    this.firstSet["STRUCT_3"] = ["}", "PTipoStruct"];
-    this.firstSet["VALUE"] = ["Numero", "String", "Boolean", "Id"];
-    this.firstSet["VECTOR_VALUE"] = ["IntPos", "Id"];
-    this.firstSet["TYPE"] = ["int", "boolean", "string", "real", "Id"];
-    this.firstSet["BEGIN"] = ["PConst", "PStruct", "PVar", "PGeraFuncaoeProcedure", "PStart"];
-    this.firstSet["CONDITIONAL"] = ["if"];
-    this.firstSet["END_CONDITIONAL"] = ["else"];
-    this.firstSet["LOOP"] = ["while"];
-    this.firstSet["GENERATE_FUNCTION_AND_PROCEDURE"] = ["PFuncao", "procedure"];
+  constructor (tokens) {
+    this.tokens = tokens;
+    this.tokenPointer = 0;
+    this.currentToken = this.tokens[this.tokenPointer].token;
+    this.currentLexeme = this.tokens[this.tokenPointer].lexeme; 
+  }
 
+  accept (expected, checkToken = false) {
+    if (checkToken && this.currentToken == expected) {
+      this.nextToken();
+      return true;
+    } else if (!checkToken && this.currentLexeme == expected) {
+      this.nextToken();
+      return true;
+    }
+    return false;
+  }
 
-    this.firstSet["VAR"] = ["var"];
-    this.firstSet["TYPE_VAR"] = ["int", "boolean", "string", "real","Id"];
-    this.firstSet["ID_VAR"] = ["Id"];
-    this.firstSet["VAR_2"] = [",",";","=","["];
-    this.firstSet["VAR_3"] = ["}","int", "boolean", "string", "real","Id"];
-    this.firstSet["VAR_4"] = [",",";"];
-    this.firstSet["VECTOR_3"] = ["["];
-    this.firstSet["MATRIX"] = ["[",",",";"];
-    this.firstSet["PARAMETERS_LIST"] = ["local", "global","Id","Numero","String"];
-    this.firstSet["PARAMETERS_LIST_CONTINUATION"] = [","];
-    this.firstSet["PARAMETERS_LIST_2"] = ["local", "global","Id","Numero","String"];
-    this.firstSet["IDENTIFIER"] = ["local", "global","Id"];
-    this.firstSet["IDENTIFIER_2"] = [".","["];
-    this.firstSet["IDENTIFIER_3"] = [".","[","("];
-    this.firstSet["IDENTIFIER_4"] = ["."];
-    this.firstSet["VECTOR"] = ["[","."];
-    this.firstSet["VECTOR_2"] = ["["];
-    this.firstSet["BODY2"] = ["if", "while", "read", "print", "return", "local", "global", "Id"];
+  acceptType (except = null) {
+    if (this.currentLexeme == except) return false;
+    if (Definitions.types.includes(this.currentLexeme)) {
+      this.nextToken();
+      return true;
+    }
+    return false;
+  }
 
-    this.firstSet["VECTOR_INDEX"] = ["IntPos", "local", "global","Id"];
-    this.firstSet["SCOPE"] = ["local", "global"];
-    this.firstSet["IDENTIFIER_WITHOUT_FUNCTION"] = ["local", "global", "Id"];
-    this.firstSet["ARITHMETIC_EXPRESSION"] = ["(", "Numero", "local", "global", "Id", "++", "--"];
-    this.firstSet["E2"] = ["+", "-"];
-    this.firstSet["T"] = ["(", "Numero"];
-    this.firstSet["T2"] = ["*", "/"];
-    this.firstSet["F"] = ["(", "Numero"];
-    this.firstSet["ARITHMETIC_IDENTIFIER"] = ["local", "global", "Id"];
-    this.firstSet["LOGICAL_RELATIONAL_EXPRESSION"] = ["!", "true", "false", "String", "(", "Numero", "local", "global", "Id", "++", "--", "!=", "==", "<", ">", "<=", ">=", "("];
-    this.firstSet["LR_Expression"] = ["!", "true", "false", "String", "(", "Numero", "local", "global", "Id", "++", "--", "!=", "==", "<", ">", "<=", ">="];
-    this.firstSet["LR2_Expression"] = ["!=", "==", "<", ">", "<=", ">=", "&&", "||"];
-    this.firstSet["LR3_Expression"] = ["&&", "||"];
-    this.firstSet["LR_ARGUMENT"] = ["!", "true", "false", "String", "(", "Numero", "local", "global", "Id", "++", "--"];
-    this.firstSet["LR2_ARGUMENT"] = ["!", "true", "false"];
-    this.firstSet["LR2_1_ARGUMENT"] = ["Id", "true", "false"];
-    this.firstSet["LR3_ARGUMENT"] = ["String", "(", "Numero", "local", "global", "Id", "++", "--"];
-    this.firstSet["RELATIONAL_OPERATOR"] = ["!=", "==", "<", ">", "<=", ">="];
-    this.firstSet["LOGICAL_OPERATOR"] = ["&&", "||"];
-    this.firstSet["PRINT"] = ["print"];
-    this.firstSet["PRINT_1"] = ["String", "Numero", "local", "global","Id"];
-    this.firstSet["AUX_PRINT"] = [")", ","];
-    this.firstSet["PRINT_END"] = [")"];
-    this.firstSet["READ"] = ["read"];
-    this.firstSet["READ_1"] = ["local", "global", "Id"]; 
-    this.firstSet["AUX_READ"] = [",", ")"];
-    this.firstSet["END_READ"] = [")"];
-    this.firstSet["BODY"] = ["}", "var"];
-    this.firstSet["COMMANDS"] = ["if", "while", "read", "print", "return", "local", "global", "Id"];
-    this.firstSet["COMMAND_IDENTIFIER"] = ["local", "global", "Id"]; 
-    this.firstSet["COMMAND_IDENTIFIER_2"] = ["=", "("];
-    this.firstSet["COMMAND_IDENTIFIER_2_1"] = ["(", "Numero", "local", "global", "Id", "++", "--", "String", "Boolean"];
-    this.firstSet["RETURN_COMMAND"] = ["return"];
-    this.firstSet["RETURN_CODE"] = [";", "(", "Numero", "local", "global", "Id", "++", "--"];
-    this.firstSet["START"] = ["start"];
-    
+  acceptValue (except = null) {
+    let generalGroup = ["Number", "String", "Identifier"]
+    if (this.currentLexeme == except) return false;
+    if ((Definitions.boolean.includes(this.currentLexeme) || generalGroup.includes(this.currentToken))) {
+      this.nextToken();
+      return true;
+    }
+    return false;
+  }
 
+  nextToken () {
+    this.tokenPointer++;
+    this.currentToken = this.tokens[this.tokenPointer].token;
+    this.currentLexeme = this.tokens[this.tokenPointer].lexeme; 
+  }
 
-    this.followSet["SIndiceVetor"] = ["]"];
-    this.followSet["SEscopo"] = ["Id"];
-    this.followSet["SIdentificadorSemFuncao"] = ["PT2", "PE2", "SExpressaoAritmetica", "PAuxRead" "SIdentificadorComandos"];
-    this.followSet["SExpressaoAritmetica"] = ["SE2", "ST2", ")", "SArgumentoLR3", "SIdentificadorComandos2_1", ";"];
-    this.followSet["SE2"] = ["SExpressaoAritmetica", "SExpressaoAritmetica2", "SIdentificadorAritmetico3"]; 
-    this.followSet["ST"] = ["PE2", "SExpressaoAritmetica"];
-    this.followSet["ST2"] = ["PE2", "SExpressaoAritmetica", "SExpressaoAritmetica2", "SIdentificadorAritmetico3", "ST"]; 
-    this.followSet["SF"] = ["PT2", "ST"];
-    this.followSet["SIdentificadorAritmetico"] = ["SExpressaoAritmetica"];
-    this.followSet["SExpressaoLogicaRelacional"] = ["SExpressaoLR3", ")"];
-    this.followSet["SExpressaoLR"] = ["SExpressaoLogicaRelacional", ")"];
-    this.followSet["SExpressaoLR2"] = ["SExpressaoLR"];
-    this.followSet["SExpressaoLR3"] = ["SExpressaoLogicaRelacional", "SExpressaoLR", "SExpressaoLR2"];
-    this.followSet["SArgumentoLR"] = ["PExpressaoLR3", "SExpressaoLR2", "SExpressaoLR"];
-    this.followSet["SArgumentoLR2"] = ["PExpressaoLR2", "SExpressaoLR"]; 
-    this.followSet["SArgumentoLR2_1"] = ["SArgumentoLR2"];
-    this.followSet["SArgumentoLR3"] = ["POperadorRelacional", "SArgumentoLR"];
-    this.followSet["SOperadorRelacional"] = ["PArgumentoLR"];
-    this.followSet["SOperadorLogico"] = ["PExpressaoLogicaRelacional"];
-    this.followSet["SPrint"] = ["SComandos"];
-    this.followSet["SPrint1"] = ["SPrint", "SAuxPrint"];
-    this.followSet["SAuxPrint"] = ["SPrint1"];
-    this.followSet["SPrintFim"] = ["SAuxPrint"];
-    this.followSet["SRead"] = ["SComandos"];
-    this.followSet["SRead1"] = ["SRead", "SAuxRead"];
-    this.followSet["SAuxRead"] = ["SRead1"];
-    this.followSet["SReadFim"] = ["SAuxRead"];
-    this.followSet["SCorpo"] = ["}", "SF2"];
-    this.followSet["SComandos"] = ["PCorpo2", "SCorpo2"];
-    this.followSet["SIdentificadorComandos"] = ["SComandos"];
-    this.followSet["SIdentificadorComandos2"] = [";"];
-    this.followSet["SIdentificadorComandos2_1"] = ["SIdentificadorComandos2"];
-    this.followSet["SComandosReturn"] = ["SComandos"];
-    this.followSet["SCodigosRetornos"] = ["SComandosReturn"];
-    this.followSet["SStart"] = ["SInicio"];
+  startAnalisys () {
+    console.table(this.tokens)
+    this.parseConst();
+    this.parseStruct();
+  }
 
-    this.followSet["SProcedimento"] = ["SGeraFuncaoeProcedure","PGeraFuncaoeProcedure"];
-    this.followSet["SParametro"] = ["PTipo"];
-    this.followSet["SPara1"] = ["SParametro"];
-    this.followSet["SPara2"] = ["PARA1"];
-    this.followSet["SPara3"] = ["SPara2"];
-    this.followSet["SF2"] = ["SPara1"];
-    this.followSet["SConst"] = ["PStruct", "PVar", "PGeraFuncaoeProcedure", "PStart"];
-    this.followSet["STipoConst"] = ["SConst", "SConst3"];
-    this.followSet["SIndiceVetor"] = ["]"];
-    this.followSet["SEscopo"] = ["Id"];
-    this.followSet["SIdentificadorSemFuncao"] = ["PT2", "PE2", "SExpressaoAritmetica", "PAuxRead", "SIdentificadorComandos"];
-    this.followSet["SExpressaoAritmetica"] = ["SE2", "ST2", ")", "SArgumentoLR3", "SIdentificadorComandos2_1", ";"];
-    this.followSet["SE2"] = ["SExpressaoAritmetica", "SExpressaoAritmetica2", "SIdentificadorAritmetico3"];
-    this.followSet["ST"] = ["SExpressaoAritmetica", "PE2"];
-    this.followSet["ST2"] = ["PE2", "SExpressaoAritmetica", "SExpressaoAritmetica2", "ST", "SIdentificadorAritmetico3"];
-    this.followSet["SF"] = ["PT2", "ST"];
-    this.followSet["SIdentificadorAritmetico"] = ["SExpressaoAritmetica"];
-    this.followSet["SStruct3"] = ["SStruct2"];
-    this.followSet["SValor"] = ["PVar4","PConst2"];
-    this.followSet["SValorVetor"] = ["]"];
-    this.followSet["STipo"] = ["Id", "PIdConst", "PIdStruct", "PIdVar"];
-    this.followSet["SInicio"] = ["$"];
-    this.followSet["SCondicional"] = ["SComandos"];
-    this.followSet["SCondEnd"] = ["SCondicional"];
-    this.followSet["SLaco"] = ["SComandos"];
-    this.followSet["SGeraFuncaoeProcedure"] = ["PStart"];
+  parseConst () {
+    if (this.accept('const')) {
+      if (this.accept ('{')) {
+        this.parseTypeConst()
+      }
+    }
+  }
 
-    this.followSet["SVar"] = ["PGerarFuncaoeProcedure","start","PCorpo2", "SCorpo"];
-    this.followSet["STipoVar"] = ["SVar", "SVar3"];
-    this.followSet["SIdVar"] = ["STipoVar","SVar2","SVar4"];
-    this.followSet["SVar2"] = ["SIdVar"];
-    this.followSet["SVar3"] = ["SVar2","SVar4"];
-    this.followSet["SVar4"] = ["SVar2","SMatriz"];
-    this.followSet["SVetor3"] = ["PVar4"];
-    this.followSet["SMatriz"] = ["SVetor3"];
-    this.followSet["SListaParametros"] = ["SContListaParametros",")"];
-    this.followSet["SContListaParametros"] = ["SListaParametros"];
-    this.followSet["SListaParametros2"] = ["SContListaParametros","SListaParametros"];
-    this.followSet["SIdentificador"] = ["SListaParametros2","SIndiceVetor","PAuxPrint"];
-    this.followSet["SIdentificador2"] = ["SIdentificador","SIdentificador3","SIdentificadorSemFuncao","PExpressaoAritmetica2","SIdentificadorAritmetico3","SIdentificadorAritmetico"];
-    this.followSet["SIdentificador3"] = ["SIdentificador"];
-    this.followSet["SIdentificador4"] = ["SVetor"];
-    this.followSet["SVetor"] = ["SIdentificador2","SIdentificador4"];
-    this.followSet["SVetor2"] = ["PIdentificador4","SVetor"];
-    this.firstSet["Corpo2"] = ["{"];
+  parseTypeConst () {
+    if (this.acceptType()) {
+      this.parseConstExpression()
+    }
+  }
+
+  parseConstExpression () {
+    if(this.accept('Identifier', true)) {
+      if (this.acceptValue()) {
+        this.parseConstContinuation()
+      }
+    }
+  }
+
+  parseConstContinuation () {
+    if (this.accept(',')) {
+      this.parseConstExpression()
+    } else if (this.accept(';')) {
+      this.parseConstTermination()
+    }
+  }
+
+  parseConstTermination () {
+    if (this.accept('}')) {
+      console.log('fechou');
+    } else {
+      this.parseTypeConst();
+    }
+  }
+
+  parseStruct () {
+    if (this.accept('typedef')) {
+
+    }
   }
 }
+
+module.exports = SyntaticalAnalyzer

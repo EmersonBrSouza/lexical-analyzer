@@ -1,6 +1,4 @@
 {
-
-
   "ARITHMETIC_EXPRESSION": ["SE2", "ST2", ")", "SArgumentoLR3", "SIdentificadorComandos2_1", ";"],
   "ARITHMETIC_IDENTIFIER": ["SExpressaoAritmetica"],
   "AUX_PRINT": ["SPrint1"],
@@ -43,8 +41,8 @@
   "PARAMETERS_LIST_2": ["SContListaParametros","SListaParametros"],
   "PARAMETERS_LIST_CONTINUATION": ["SListaParametros"],
   "PARAMETERS_LIST": ["SContListaParametros",")"],
-  "PRINT_1": ["SPrint", "SAuxPrint"],
-  "PRINT_END": ["SAuxPrint"],
+  "PRINT_1": ["(", "\"", "local", "global", "Letter", "-", "Digit", ")"],
+  "PRINT_END": ["\"", "local", "global", "Letter", "-", "Digit", ")"],
   "PRINT": ["SComandos"],
   "PROCEDURE": ["SGeraFuncaoeProcedure", "function", "procedure"],
   "READ_1": ["SRead", "SAuxRead"],
