@@ -63,21 +63,21 @@ Lista de Tokens:
 21 c Identifier
 21 ; Delimiter
 22 } Delimiter
-23 while Reserved Word
-23 { Delimiter
-24 print Reserved Word
-24 ( Delimiter
-24 aa Identifier
-24 ) Delimiter
-25 } Delimiter
+24 while Reserved Word
+24 { Delimiter
+25 print Reserved Word
+25 ( Delimiter
+25 aa Identifier
+25 ) Delimiter
 26 } Delimiter
-28 procedure Reserved Word
-28 b Identifier
-28 ( Delimiter
-28 int Reserved Word
-28 a Identifier
-28 ) Delimiter
-28 { Delimiter
-30 } Delimiter
+27 } Delimiter
+29 procedure Reserved Word
+29 b Identifier
+29 ( Delimiter
+29 int Reserved Word
+29 a Identifier
+29 ) Delimiter
+29 { Delimiter
+31 } Delimiter
 
 Lista de Erros:

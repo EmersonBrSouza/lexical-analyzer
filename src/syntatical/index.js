@@ -1,534 +1,172 @@
-const Definitions = require('./syntax_definitions');
-
 class SyntaticalAnalyzer {
-  constructor (tokens) {
-    this.tokens = tokens;
-    this.tokenPointer = 0;
-    if (this.tokenPointer < this.tokens.length) {
-      this.currentToken = this.tokens[this.tokenPointer].token;
-      this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
-    }
-    this.errors = [];
-  }
 
-
-  startAnalisys () {
-    console.log(this.tokens);
-    this.const();
-    this.struct();
-    this.var();
-    this.generateFunctionAndProcedure();
-  }
-
-  nextToken () {
-    this.tokenPointer++;
-    if (this.tokenPointer < this.tokens.length) {
-      this.currentToken = this.tokens[this.tokenPointer].token;
-      this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
-    }
-  }
-
-  /** General Use */
-  value () {
-    let generalGroup = ["Number", "String", "Identifier"]
-    return (Definitions.boolean.includes(this.currentLexeme) || generalGroup.includes(this.currentToken))
-  }
-
-  valueVector () {
-    if (this.currentToken == 'Identifier') {
-      return true;
-    } else  if (this.currentToken == 'Number') {
-      return this.currentLexeme % 1 === 0 && parseInt(this.currentLexeme) >= 0;
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * Const Methods
-   */
-  const () {
-    if (this.currentLexeme == 'const') {
-      this.nextToken();
-      if(this.currentLexeme == '{') {
-        this.nextToken();
-        this.typeConst();
-      }
-    } else {
-      return;
-    }
-  }
-
-  typeConst () {
-    if (Definitions.types.includes(this.currentLexeme)) {
-      this.nextToken();
-      this.idConst();
-    }
-  }
-
-  idConst () {
-    if (this.currentToken == 'Identifier') {
-      this.nextToken();
-      if(this.value()) {
-        this.nextToken();
-        this.const2();
-      }
-    }
-  }
   
-  const2 () {
-    if (this.currentLexeme == ',') {
-      this.nextToken();
-      this.idConst();
-    } else if (this.currentLexeme == ';') {
-      this.nextToken();
-      this.const3();
-    }
-  }
+  generateSets () {
+    this.firstSet["PROCEDURE"] = ["procedure"];
+    this.firstSet["PARAMETER"] = ["int", "boolean", "string", "real", "Id"];
+    this.firstSet["PARAM1"] = [",", ")"];
+    this.firstSet["PARAM2"] = ["["];
+    this.firstSet["PARAM3"] = ["["];
+    this.firstSet["F2"] = ["{"];
+    this.firstSet["CONST"] = ["const"];
+    this.firstSet["TIPO_CONST"] = ["int", "boolean", "string", "real", "Id"];
+    this.firstSet["VECTOR_INDEX"] = ["IntPos", "local", "global","Id"];
+    this.firstSet["SCOPE"] = ["local", "global"];
+    this.firstSet["PIdentificadorSemFuncao"] = ["PEscopo", "Id"];
+    this.firstSet["PExpressaoAritmetica"] = ["PT", "PIdentificadorAritmetico", "++", "--"];
+    this.firstSet["PE2"] = ["+", "-"];
+    this.firstSet["PT"] = ["PF"];
+    this.firstSet["PT2"] = ["*",  "/"];
+    this.firstSet["PF"] = ["(", "Numero"];
+    this.firstSet["ARITHMETIC_IDENTIFIER"] = ["PEscopo", "Id"];
+    this.firstSet["STRUCT_3"] = ["}", "PTipoStruct"];
+    this.firstSet["VALUE"] = ["Numero", "String", "Boolean", "Id"];
+    this.firstSet["VECTOR_VALUE"] = ["IntPos", "Id"];
+    this.firstSet["TYPE"] = ["int", "boolean", "string", "real", "Id"];
+    this.firstSet["BEGIN"] = ["PConst", "PStruct", "PVar", "PGeraFuncaoeProcedure", "PStart"];
+    this.firstSet["CONDITIONAL"] = ["if"];
+    this.firstSet["END_CONDITIONAL"] = ["else"];
+    this.firstSet["LOOP"] = ["while"];
+    this.firstSet["GENERATE_FUNCTION_AND_PROCEDURE"] = ["PFuncao", "procedure"];
 
-  const3 () {
+
+    this.firstSet["VAR"] = ["var"];
+    this.firstSet["TYPE_VAR"] = ["int", "boolean", "string", "real","Id"];
+    this.firstSet["ID_VAR"] = ["Id"];
+    this.firstSet["VAR_2"] = [",",";","=","["];
+    this.firstSet["VAR_3"] = ["}","int", "boolean", "string", "real","Id"];
+    this.firstSet["VAR_4"] = [",",";"];
+    this.firstSet["VECTOR_3"] = ["["];
+    this.firstSet["MATRIX"] = ["[",",",";"];
+    this.firstSet["PARAMETERS_LIST"] = ["local", "global","Id","Numero","String"];
+    this.firstSet["PARAMETERS_LIST_CONTINUATION"] = [","];
+    this.firstSet["PARAMETERS_LIST_2"] = ["local", "global","Id","Numero","String"];
+    this.firstSet["IDENTIFIER"] = ["local", "global","Id"];
+    this.firstSet["IDENTIFIER_2"] = [".","["];
+    this.firstSet["IDENTIFIER_3"] = [".","[","("];
+    this.firstSet["IDENTIFIER_4"] = ["."];
+    this.firstSet["VECTOR"] = ["[","."];
+    this.firstSet["VECTOR_2"] = ["["];
+    this.firstSet["BODY2"] = ["if", "while", "read", "print", "return", "local", "global", "Id"];
+
+    this.firstSet["VECTOR_INDEX"] = ["IntPos", "local", "global","Id"];
+    this.firstSet["SCOPE"] = ["local", "global"];
+    this.firstSet["IDENTIFIER_WITHOUT_FUNCTION"] = ["local", "global", "Id"];
+    this.firstSet["ARITHMETIC_EXPRESSION"] = ["(", "Numero", "local", "global", "Id", "++", "--"];
+    this.firstSet["E2"] = ["+", "-"];
+    this.firstSet["T"] = ["(", "Numero"];
+    this.firstSet["T2"] = ["*", "/"];
+    this.firstSet["F"] = ["(", "Numero"];
+    this.firstSet["ARITHMETIC_IDENTIFIER"] = ["local", "global", "Id"];
+    this.firstSet["LOGICAL_RELATIONAL_EXPRESSION"] = ["!", "true", "false", "String", "(", "Numero", "local", "global", "Id", "++", "--", "!=", "==", "<", ">", "<=", ">=", "("];
+    this.firstSet["LR_Expression"] = ["!", "true", "false", "String", "(", "Numero", "local", "global", "Id", "++", "--", "!=", "==", "<", ">", "<=", ">="];
+    this.firstSet["LR2_Expression"] = ["!=", "==", "<", ">", "<=", ">=", "&&", "||"];
+    this.firstSet["LR3_Expression"] = ["&&", "||"];
+    this.firstSet["LR_ARGUMENT"] = ["!", "true", "false", "String", "(", "Numero", "local", "global", "Id", "++", "--"];
+    this.firstSet["LR2_ARGUMENT"] = ["!", "true", "false"];
+    this.firstSet["LR2_1_ARGUMENT"] = ["Id", "true", "false"];
+    this.firstSet["LR3_ARGUMENT"] = ["String", "(", "Numero", "local", "global", "Id", "++", "--"];
+    this.firstSet["RELATIONAL_OPERATOR"] = ["!=", "==", "<", ">", "<=", ">="];
+    this.firstSet["LOGICAL_OPERATOR"] = ["&&", "||"];
+    this.firstSet["PRINT"] = ["print"];
+    this.firstSet["PRINT_1"] = ["String", "Numero", "local", "global","Id"];
+    this.firstSet["AUX_PRINT"] = [")", ","];
+    this.firstSet["PRINT_END"] = [")"];
+    this.firstSet["READ"] = ["read"];
+    this.firstSet["READ_1"] = ["local", "global", "Id"]; 
+    this.firstSet["AUX_READ"] = [",", ")"];
+    this.firstSet["END_READ"] = [")"];
+    this.firstSet["BODY"] = ["}", "var"];
+    this.firstSet["COMMANDS"] = ["if", "while", "read", "print", "return", "local", "global", "Id"];
+    this.firstSet["COMMAND_IDENTIFIER"] = ["local", "global", "Id"]; 
+    this.firstSet["COMMAND_IDENTIFIER_2"] = ["=", "("];
+    this.firstSet["COMMAND_IDENTIFIER_2_1"] = ["(", "Numero", "local", "global", "Id", "++", "--", "String", "Boolean"];
+    this.firstSet["RETURN_COMMAND"] = ["return"];
+    this.firstSet["RETURN_CODE"] = [";", "(", "Numero", "local", "global", "Id", "++", "--"];
+    this.firstSet["START"] = ["start"];
     
-    if (this.currentLexeme == '}') {
-      this.nextToken();
-      console.log('fechou const')
-    } else {
-      this.typeConst();
-    }
+
+
+    this.followSet["SIndiceVetor"] = ["]"];
+    this.followSet["SEscopo"] = ["Id"];
+    this.followSet["SIdentificadorSemFuncao"] = ["PT2", "PE2", "SExpressaoAritmetica", "PAuxRead" "SIdentificadorComandos"];
+    this.followSet["SExpressaoAritmetica"] = ["SE2", "ST2", ")", "SArgumentoLR3", "SIdentificadorComandos2_1", ";"];
+    this.followSet["SE2"] = ["SExpressaoAritmetica", "SExpressaoAritmetica2", "SIdentificadorAritmetico3"]; 
+    this.followSet["ST"] = ["PE2", "SExpressaoAritmetica"];
+    this.followSet["ST2"] = ["PE2", "SExpressaoAritmetica", "SExpressaoAritmetica2", "SIdentificadorAritmetico3", "ST"]; 
+    this.followSet["SF"] = ["PT2", "ST"];
+    this.followSet["SIdentificadorAritmetico"] = ["SExpressaoAritmetica"];
+    this.followSet["SExpressaoLogicaRelacional"] = ["SExpressaoLR3", ")"];
+    this.followSet["SExpressaoLR"] = ["SExpressaoLogicaRelacional", ")"];
+    this.followSet["SExpressaoLR2"] = ["SExpressaoLR"];
+    this.followSet["SExpressaoLR3"] = ["SExpressaoLogicaRelacional", "SExpressaoLR", "SExpressaoLR2"];
+    this.followSet["SArgumentoLR"] = ["PExpressaoLR3", "SExpressaoLR2", "SExpressaoLR"];
+    this.followSet["SArgumentoLR2"] = ["PExpressaoLR2", "SExpressaoLR"]; 
+    this.followSet["SArgumentoLR2_1"] = ["SArgumentoLR2"];
+    this.followSet["SArgumentoLR3"] = ["POperadorRelacional", "SArgumentoLR"];
+    this.followSet["SOperadorRelacional"] = ["PArgumentoLR"];
+    this.followSet["SOperadorLogico"] = ["PExpressaoLogicaRelacional"];
+    this.followSet["SPrint"] = ["SComandos"];
+    this.followSet["SPrint1"] = ["SPrint", "SAuxPrint"];
+    this.followSet["SAuxPrint"] = ["SPrint1"];
+    this.followSet["SPrintFim"] = ["SAuxPrint"];
+    this.followSet["SRead"] = ["SComandos"];
+    this.followSet["SRead1"] = ["SRead", "SAuxRead"];
+    this.followSet["SAuxRead"] = ["SRead1"];
+    this.followSet["SReadFim"] = ["SAuxRead"];
+    this.followSet["SCorpo"] = ["}", "SF2"];
+    this.followSet["SComandos"] = ["PCorpo2", "SCorpo2"];
+    this.followSet["SIdentificadorComandos"] = ["SComandos"];
+    this.followSet["SIdentificadorComandos2"] = [";"];
+    this.followSet["SIdentificadorComandos2_1"] = ["SIdentificadorComandos2"];
+    this.followSet["SComandosReturn"] = ["SComandos"];
+    this.followSet["SCodigosRetornos"] = ["SComandosReturn"];
+    this.followSet["SStart"] = ["SInicio"];
+
+    this.followSet["SProcedimento"] = ["SGeraFuncaoeProcedure","PGeraFuncaoeProcedure"];
+    this.followSet["SParametro"] = ["PTipo"];
+    this.followSet["SPara1"] = ["SParametro"];
+    this.followSet["SPara2"] = ["PARA1"];
+    this.followSet["SPara3"] = ["SPara2"];
+    this.followSet["SF2"] = ["SPara1"];
+    this.followSet["SConst"] = ["PStruct", "PVar", "PGeraFuncaoeProcedure", "PStart"];
+    this.followSet["STipoConst"] = ["SConst", "SConst3"];
+    this.followSet["SIndiceVetor"] = ["]"];
+    this.followSet["SEscopo"] = ["Id"];
+    this.followSet["SIdentificadorSemFuncao"] = ["PT2", "PE2", "SExpressaoAritmetica", "PAuxRead", "SIdentificadorComandos"];
+    this.followSet["SExpressaoAritmetica"] = ["SE2", "ST2", ")", "SArgumentoLR3", "SIdentificadorComandos2_1", ";"];
+    this.followSet["SE2"] = ["SExpressaoAritmetica", "SExpressaoAritmetica2", "SIdentificadorAritmetico3"];
+    this.followSet["ST"] = ["SExpressaoAritmetica", "PE2"];
+    this.followSet["ST2"] = ["PE2", "SExpressaoAritmetica", "SExpressaoAritmetica2", "ST", "SIdentificadorAritmetico3"];
+    this.followSet["SF"] = ["PT2", "ST"];
+    this.followSet["SIdentificadorAritmetico"] = ["SExpressaoAritmetica"];
+    this.followSet["SStruct3"] = ["SStruct2"];
+    this.followSet["SValor"] = ["PVar4","PConst2"];
+    this.followSet["SValorVetor"] = ["]"];
+    this.followSet["STipo"] = ["Id", "PIdConst", "PIdStruct", "PIdVar"];
+    this.followSet["SInicio"] = ["$"];
+    this.followSet["SCondicional"] = ["SComandos"];
+    this.followSet["SCondEnd"] = ["SCondicional"];
+    this.followSet["SLaco"] = ["SComandos"];
+    this.followSet["SGeraFuncaoeProcedure"] = ["PStart"];
+
+    this.followSet["SVar"] = ["PGerarFuncaoeProcedure","start","PCorpo2", "SCorpo"];
+    this.followSet["STipoVar"] = ["SVar", "SVar3"];
+    this.followSet["SIdVar"] = ["STipoVar","SVar2","SVar4"];
+    this.followSet["SVar2"] = ["SIdVar"];
+    this.followSet["SVar3"] = ["SVar2","SVar4"];
+    this.followSet["SVar4"] = ["SVar2","SMatriz"];
+    this.followSet["SVetor3"] = ["PVar4"];
+    this.followSet["SMatriz"] = ["SVetor3"];
+    this.followSet["SListaParametros"] = ["SContListaParametros",")"];
+    this.followSet["SContListaParametros"] = ["SListaParametros"];
+    this.followSet["SListaParametros2"] = ["SContListaParametros","SListaParametros"];
+    this.followSet["SIdentificador"] = ["SListaParametros2","SIndiceVetor","PAuxPrint"];
+    this.followSet["SIdentificador2"] = ["SIdentificador","SIdentificador3","SIdentificadorSemFuncao","PExpressaoAritmetica2","SIdentificadorAritmetico3","SIdentificadorAritmetico"];
+    this.followSet["SIdentificador3"] = ["SIdentificador"];
+    this.followSet["SIdentificador4"] = ["SVetor"];
+    this.followSet["SVetor"] = ["SIdentificador2","SIdentificador4"];
+    this.followSet["SVetor2"] = ["PIdentificador4","SVetor"];
+    this.firstSet["Corpo2"] = ["{"];
   }
-
-  /**
-   * Struct Methods
-   */
-  struct () {
-    if (this.currentLexeme == 'typedef') {
-      this.nextToken();
-      if (this.currentLexeme == 'struct') {
-        this.nextToken();
-        if (this.currentToken == 'Identifier') {
-          this.nextToken();
-          this.extends();
-        }
-      }
-    } else {
-      return;
-    }
-  }
-
-  extends () {
-    if (this.currentLexeme == 'extends') {
-      this.nextToken();
-      if (this.currentToken == 'Identifier') {
-        this.nextToken();
-        if (this.currentLexeme == '{') {
-          this.nextToken();
-          this.typeStruct();
-        }
-      }
-    } else if (this.currentLexeme == '{') {
-      this.nextToken();
-      this.typeStruct();
-    }
-  }
-
-  typeStruct () {
-    if (Definitions.types.includes(this.currentLexeme)) {
-      this.nextToken()
-      this.idStruct()
-    }
-  }
-
-  idStruct () {
-    if (this.currentToken == 'Identifier') {
-      this.nextToken();
-      this.struct2();
-    }
-  }
-
-  struct2 () {
-    if (this.currentLexeme == ',') {
-      this.nextToken();
-      this.idStruct();
-    } else if (this.currentLexeme == ';') {
-      this.nextToken();
-      this.struct3();
-    }
-  }
-
-  struct3 () {
-    if (this.currentLexeme == '}') {
-      this.nextToken();
-      console.log('fechou struct')
-    } else {
-      this.typeStruct();
-    }
-  }
-
-  /**
-   * Var Methods
-   */
-
-  var () {
-    if (this.currentLexeme == 'var') {
-      this.nextToken();
-      if(this.currentLexeme == '{') {
-        this.nextToken();
-        this.typeVar();
-      }
-    }
-  }
-
-  typeVar () {
-    if (Definitions.types.includes(this.currentLexeme)) {
-      this.nextToken()
-      this.idVar()
-    }
-  }
-
-  idVar () {
-    if (this.currentToken == 'Identifier') {
-      this.nextToken();
-      this.var2();
-    }
-  }
-
-  var2 () {
-    if (this.currentLexeme == ',') {
-      this.nextToken();
-      this.idVar();
-    } else if (this.currentLexeme == ';') {
-      this.nextToken();
-      this.var3();
-    } else if (this.currentLexeme == '=') {
-      this.nextToken();
-      if (this.value()) {
-        this.nextToken();
-        this.var4();
-      }
-    } else if (this.currentLexeme == '[') {
-      this.vector();
-    }
-  }
-
-  var3 () {
-    if (this.currentLexeme == '}') {
-      this.nextToken();
-      console.log('fechou var');
-    } else {
-      this.typeVar();
-    }
-  }
-
-  var4 () {
-    if (this.currentLexeme == ',') {
-      this.nextToken();
-      this.idVar();
-    } else if (this.currentLexeme == ';') {
-      this.nextToken();
-      this.var3();
-    }
-  }
-
-  vector () {
-    if (this.currentLexeme == '[') {
-      this.nextToken();
-      if(this.valueVector()) {
-        this.nextToken();
-        if (this.currentLexeme == ']') {
-          this.nextToken();
-          this.matrix();
-        }
-      }
-    }
-  }
-
-  matrix () {
-    if (this.currentLexeme == '[') {
-      this.nextToken();
-      if(this.valueVector()) {
-        this.nextToken();
-        if (this.currentLexeme == ']') {
-          this.nextToken();
-          this.var4();
-        }
-      }
-    } else {
-      this.var4();
-    }
-  }
-
-  /**
-   * Generate Function And Procedure
-   */
-
-  generateFunctionAndProcedure () {
-    if (this.currentLexeme == 'function') {
-      this.func();
-      this.generateFunctionAndProcedure();
-    } else if (this.currentLexeme == 'procedure') {
-      this.procedure();
-      this.generateFunctionAndProcedure();
-    }
-  }
-
-  func () {
-    if (this.currentLexeme == 'function') {
-      this.nextToken();
-      if (Definitions.types.includes(this.currentLexeme)) {
-        this.nextToken();
-        if (this.currentToken == 'Identifier') {
-          this.nextToken();
-          if (this.currentLexeme == '(') {
-            this.nextToken();
-            this.param();
-          }
-        }
-      }
-    }
-  }
-
-  procedure () {
-    if (this.currentLexeme == 'procedure') {
-      this.nextToken();
-      if (this.currentToken == 'Identifier') {
-        this.nextToken();
-        if (this.currentLexeme == '(') {
-          this.nextToken();
-          this.param();
-        }
-      }
-    }
-  }
-
-  param () {
-    if (Definitions.types.includes(this.currentLexeme)) {
-      this.nextToken()
-      if(this.currentToken == 'Identifier') {
-        this.nextToken()
-        this.param2()
-        this.param1()
-      }
-    }
-  }
-
-  param1 () {
-    if (this.currentLexeme == ',') {
-      this.nextToken();
-      this.param();
-    } else if (this.currentLexeme == ')') {
-      this.nextToken();
-      this.f2();
-    }
-  }
-
-  param2 () {
-    if (this.currentLexeme == '[') {
-      this.nextToken();
-      if (this.currentLexeme == ']') {
-        this.nextToken();
-        this.param3();
-      }
-    }
-  }
-
-  param3 () {
-    if (this.currentLexeme == '[') {
-      this.nextToken();
-      if (this.currentLexeme == ']') {
-        this.nextToken();
-      }
-    }
-  }
-
-  f2 () {
-    
-    if (this.currentLexeme == '{') {
-      console.log('abriu func');
-      this.nextToken();
-      this.body();
-    }
-  }
-
-  body () {
-    if (this.currentLexeme == 'var') {
-      this.var();
-      this.body2();
-      if (this.currentLexeme == '}') {
-        console.log('fechou func');
-      }
-    } else if ('}') {
-      this.nextToken();
-      console.log('fechou func');
-    }
-  }
-
-  body2 () {
-    if (Definitions.commands.includes(this.currentLexeme)) {
-      this.commands();
-    }
-    //<IdentificadorComandos>
-  }
-
-  commands () {
-    if (this.currentLexeme == 'while') {
-      this.loop();
-    } else if (this.currentLexeme == 'if') {
-      this.conditional();
-    } else if (this.currentLexeme == 'read') {
-      this.read();
-    } else if (this.currentLexeme == 'print') {
-      this.print();
-    }
-  }
-
-  loop () {
-    if(this.currentLexeme == 'while') {
-      this.nextToken();
-      if (this.currentLexeme == '(') {
-        this.expressionLogicRelational();
-        if (this.currentLexeme == ')') {
-          this.nextToken();
-          if (this.currentLexeme == '{') {
-            this.nextToken();
-            this.body();
-            this.nextToken();
-            if (this.currentLexeme == '}') {
-              this.nextToken();
-            }
-          }
-        }
-      }
-    }
-  }
-
-  conditional () {
-    if(this.currentLexeme == 'if') {
-      this.nextToken();
-      if (this.currentLexeme == '(') {
-        this.expressionLogicRelational();
-        if (this.currentLexeme == ')') {
-          this.nextToken();
-          if (this.currentLexeme == 'then') {
-            this.nextToken();
-            if (this.currentLexeme == '{') {
-              this.nextToken();
-              this.body();
-              this.nextToken();
-              if (this.currentLexeme == '}') {
-                this.conditionalEnd();
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  conditionalEnd () {
-    if (this.currentLexeme == 'else') {
-      this.nextToken()
-      if (this.currentLexeme == '{') {
-        this.nextToken()
-        this.body()
-        if (this.currentLexeme == '}') {
-          this.nextToken()
-        }
-      }
-    }
-  }
-  
-  read () {
-    if (this.currentLexeme == 'read') {
-      this.nextToken()
-      if (this.currentLexeme == '(') {
-        this.nextToken()
-        this.read1()
-      }
-    }
-  }
-
-  read1 () {
-    if (['String', 'Number'].includes(this.currentToken)) {
-      this.nextToken()
-      this.auxRead()
-    } else {
-      this.identifierWithoutFunction()
-      this.auxRead()
-    }
-  }
-
-  auxRead () {
-    if (this.currentLexeme == ',') {
-      this.nextToken()
-      this.print1()
-    } else {
-      this.printEnd();
-    }
-  }
-
-  readEnd () {
-    if (this.currentLexeme == ')') {
-      this.nextToken()
-      if (this.currentLexeme == ';') {
-        this.nextToken()
-      }
-    }
-  }
-
-  print () {
-    if (this.currentLexeme == 'print') {
-      this.nextToken()
-      if (this.currentLexeme == '(') {
-        this.nextToken()
-        this.print1()
-      }
-    }
-  }
-
-  print1 () {
-    if (['String', 'Number'].includes(this.currentToken)) {
-      this.nextToken()
-      this.auxPrint()
-    } else {
-      this.identifier()
-    }
-  }
-
-  auxPrint () {
-    if (this.currentLexeme == ',') {
-      this.nextToken()
-      this.print1()
-    } else {
-      this.printEnd();
-    }
-  }
-
-  printEnd () {
-    if (this.currentLexeme == ')') {
-      this.nextToken()
-      if (this.currentLexeme == ';') {
-        this.nextToken()
-      }
-    }
-  }
-
-  start () {
-    if (this.currentLexeme == 'start') {
-      this.nextToken()
-      if (this.currentLexeme == '(') {
-        this.nextToken()
-        if (this.currentLexeme == ')') {
-          this.nextToken()
-          if (this.currentLexeme == '{') {
-            this.body()
-            if (this.currentLexeme == '}') {
-              this.nextToken()
-            }
-          }
-        }
-      }
-    }
-  }
-
 }
-
-module.exports = SyntaticalAnalyzer
