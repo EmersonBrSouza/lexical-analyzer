@@ -113,7 +113,9 @@ class SyntaticalAnalyzer {
   }
 
   nextToken () {
-    this.tokenPointer++;
+    if (this.tokenPointer + 1 < this.tokens.length) {
+      this.tokenPointer++;
+    }
     this.currentToken = this.tokens[this.tokenPointer].token;
     this.currentLexeme = this.tokens[this.tokenPointer].lexeme; 
   }
@@ -726,15 +728,16 @@ class SyntaticalAnalyzer {
   parseBody () {
     if (this.match('var')) {
       this.parseVar();
-      this.parseBody2();
-      if (this.match('}')) {
-        this.accept('}')
-        console.log('fechou func');
-      }
-    } else if (this.match('}')) {
+    }
+    this.parseBody2();
+    if (this.match('}')) {
       this.accept('}')
       console.log('fechou func');
     }
+    //  else if (this.match('}')) {
+    //   this.accept('}')
+    //   console.log('fechou func');
+    // }
   }
 
   parseBody2 () {
@@ -853,10 +856,8 @@ class SyntaticalAnalyzer {
       this.accept('procedure')
       if (this.match('Identifier', true)) {
         this.accept('Identifier', true)
-        this.nextToken();
         if (this.match('(')) {
           this.accept('(')
-          this.nextToken();
           this.parseParam();
         }
       }
