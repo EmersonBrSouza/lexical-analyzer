@@ -95,6 +95,7 @@ class SyntaticalAnalyzer {
     this.parseConst();
     this.parseStruct();
     this.parseVar();
+    this.parseGenerateFuncAndProc()
     this.parseStart();
   }
 
@@ -682,6 +683,84 @@ class SyntaticalAnalyzer {
     }
   }
   
+    /**
+   * Generate Function And Procedure
+   */
+
+  parseGenerateFuncAndProc () {
+    if (this.accept('function')) {
+      this.parseFunction();
+      this.parseGenerateFuncAndProc();
+    } else if (this.accept('procedure')) {
+      this.parseProcedure();
+      this.parseGenerateFuncAndProc();
+    }
+  }
+
+  parseFunction () {
+    if (this.accept('function')) {
+      if (this.acceptType()) {
+        if (this.accept('Identifier', true)) {
+          if (this.accept('(')) {
+            this.param();
+          }
+        }
+      }
+    }
+  }
+
+  parseProcedure () {
+    if (this.accept('procedure')) {
+      if (this.accept('Identifier', true)) {
+        this.nextToken();
+        if (this.accept('(')) {
+          this.nextToken();
+          this.parseParam();
+        }
+      }
+    }
+  }
+
+  parseParam () {
+    if (this.acceptType()) {
+      if(this.accept('Identifier', true)) {
+        this.parseParam2()
+        this.parseParam1()
+      }
+    }
+  }
+
+  parseParam1 () {
+    if (this.accept(',')) {
+      this.parseParam();
+    } else if (this.accept(')')) {
+      this.parseF2();
+    }
+  }
+
+  parseParam2 () {
+    if (this.accept('[')) {
+      if (this.accept(']')) {
+        this.parseParam3();
+      }
+    }
+  }
+
+  parseParam3 () {
+    if (this.accept('[')) {
+      if (this.accept(']')) {
+        return
+      }
+    }
+  }
+
+  parseF2 () {
+    if (this.accept('{')) {
+      console.log('abriu func');
+      this.parseBody();
+    }
+  }
+
   parseStart() {
     if (this.accept('start')) {
       if (this.accept('(')) {
@@ -692,6 +771,51 @@ class SyntaticalAnalyzer {
               return
             }
           }
+        }
+      }
+    }
+  }
+
+  parseLoop () {
+    if(this.accept('while')) {
+      if (this.accept('(')) {
+        this.parseLogicalRelationalExpression();
+        if (this.accept(')')) {
+          if (this.accept('{')) {
+            this.parseBody();
+            if (this.accept( '}')) {
+              return
+            }
+          }
+        }
+      }
+    }
+  }
+
+  parseConditional () {
+    if(this.accept('if')) {
+      if (this.accept('(')) {
+        this.parseLogicalRelationalExpression();
+        if (this.accept(')')) {
+          if (this.accept('then')) {
+            if (this.accept('{')) {
+              this.parseBody();
+              if (this.accept('}')) {
+                this.parseConditionalEnd();
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  parseConditionalEnd () {
+    if (this.accept('else')) {
+      if (this.accept('{')) {
+        this.parseBody()
+        if (this.accept('}')) {
+          return
         }
       }
     }
