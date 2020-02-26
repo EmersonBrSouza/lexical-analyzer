@@ -612,7 +612,7 @@ class SyntaticalAnalyzer {
   }
 
   parseBody2 () {
-    if (this.matchFirstSet(this.currentLexeme, 'commands') || this.match('Identifier', true) || this.matchFirstSet('scope')) {
+    if (this.matchFirstSet(this.currentLexeme, 'commands') || this.match('Identifier', true) || this.matchFirstSet(this.currentLexeme,'scope')) {
       this.parseCommands()
       this.parseBody2()
     }
@@ -688,10 +688,10 @@ class SyntaticalAnalyzer {
    */
 
   parseGenerateFuncAndProc () {
-    if (this.accept('function')) {
+    if (this.match('function')) {
       this.parseFunction();
       this.parseGenerateFuncAndProc();
-    } else if (this.accept('procedure')) {
+    } else if (this.match('procedure')) {
       this.parseProcedure();
       this.parseGenerateFuncAndProc();
     }
@@ -702,7 +702,7 @@ class SyntaticalAnalyzer {
       if (this.acceptType()) {
         if (this.accept('Identifier', true)) {
           if (this.accept('(')) {
-            this.param();
+            this.parseParam();
           }
         }
       }
@@ -784,6 +784,7 @@ class SyntaticalAnalyzer {
           if (this.accept('{')) {
             this.parseBody();
             if (this.accept( '}')) {
+              console.log('fechou while')
               return
             }
           }

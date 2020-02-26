@@ -21,7 +21,7 @@ function int opa (int a, real b) {
     int b = c;
   }
   
-  while {
+  while (b == -2) {
     print(aa)
   }
 }
