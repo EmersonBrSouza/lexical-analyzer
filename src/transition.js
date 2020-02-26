@@ -12,6 +12,8 @@ class Transition {
       return args === "*"
     } else if (destiny == "q3") {
       return args ===  "-"
+    } else if (destiny == "q5") {
+      return Comparator.isDigit(args)
     } else if (destiny == "q10") {
       return args ===  "/"
     } else if (destiny == "q16") {
@@ -30,9 +32,7 @@ class Transition {
       return args === "|"
     } else if (destiny == "q26") {
       return args === '"'
-    } else if (destiny == "q30") {
-      return Comparator.isDigit(args)
-    }
+    } 
   }
 
   static q1 (destiny, args) {

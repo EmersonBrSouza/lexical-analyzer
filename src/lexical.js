@@ -39,6 +39,8 @@ class LexicalAnalyzer {
             this.state = 2;
           } else if (Transition.q0('q3', currentChar)) {
             this.state = 3;
+          } else if (Transition.q0('q5', currentChar)) {
+            this.state = 5;
           } else if (Transition.q0('q10', currentChar)) {
             this.state = 10;
           } else if (Transition.q0('q16', currentChar)) {
@@ -57,9 +59,7 @@ class LexicalAnalyzer {
             this.state = 24;
           } else if (Transition.q0('q26', currentChar)) {
             this.state = 26;
-          } else if (Transition.q0('q30', currentChar)) {
-            this.state = 30;
-          }
+          } 
           else {
             if (Comparator.isBreakline(currentChar)) {
               this.lineNumber++;
@@ -455,18 +455,6 @@ class LexicalAnalyzer {
           this.currentPos++;
           this.state = 0;
           break;
-        // case 30:
-        //   raster += this.input[this.currentPos];
-          
-
-        //   if (Comparator.isValidString(raster)) {
-        //     this.tokens.push({ token: "String", lexeme: raster, line: this.lineNumber, customCode: 11 });
-        //   } else {
-        //     this.errors.push({ error: "BadlyFormattedString", lexeme: raster, line: this.lineNumber })
-        //   }
-        //   this.currentPos++;
-        //   this.state = 0;
-        //   break;
         default:
           break;
       }

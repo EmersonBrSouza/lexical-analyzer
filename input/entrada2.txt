@@ -8,7 +8,7 @@ typedef struct o {
 }
 
 var {
-  int c = -2;
+  int c = 2;
   int a;
   int a[b];
   int b[c][a];
