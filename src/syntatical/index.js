@@ -711,7 +711,7 @@ class SyntaticalAnalyzer {
       this.accept(',')
       this.parseReadContent()
     } else if(this.match(')')) {
-      this.readEnd();
+      this.parseReadEnd();
     }
   }
 

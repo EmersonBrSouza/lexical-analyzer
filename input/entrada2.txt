@@ -24,6 +24,9 @@ function int opa (int a, real b) {
   while (b == -2) {
     print(aa)
   }
+
+  read(c)
+  print(d)
 }
 
 procedure b (int a) {
