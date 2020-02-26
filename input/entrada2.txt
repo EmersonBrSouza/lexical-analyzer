@@ -3,10 +3,11 @@ const {
   int b 3;
 }
 
-typedef struct a{
+typedef struct a {
   int b;
-  5
+  int a;
 }
+
 
 var {
   int c = 2;
