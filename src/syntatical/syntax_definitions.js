@@ -3,5 +3,5 @@ module.exports = {
   boolean: ["false", "true"],
   commands: ["while", "return", "print", "read"],
   logicalOperator: ['||', '&&'],
-  arithmeticOperator: ['!=', '==', '<', '>', '<=', '>=']
+  relationalOperator: ['!=', '==', '<', '>', '<=', '>=']
 }
