@@ -1,10 +1,11 @@
 const {
   int a 2;
-  string c "ola";
+  int b 3;
 }
 
-typedef struct o {
+typedef struct a{
   int b;
+  5
 }
 
 var {
@@ -22,15 +23,17 @@ function int opa (int a, real b) {
   }
   
   while (b == -2) {
-    print(aa)
+    print(aa);
   }
 
-  read(c)
-  print(d)
+  print("a");
+  //read(c);
 }
 
 procedure b (int a) {
 
 }
 
+start () {
 
+}

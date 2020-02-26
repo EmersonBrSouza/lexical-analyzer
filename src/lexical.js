@@ -199,7 +199,7 @@ class LexicalAnalyzer {
           }
 
           if (raster.startsWith('//')) {
-            this.tokens.push({ token: "Line Comment", lexeme: raster, line: this.lineNumber, customCode: 10 })
+            // this.tokens.push({ token: "Line Comment", lexeme: raster, line: this.lineNumber, customCode: 10 })
           } else {
             this.errors.push({ error: "WrongComment", lexeme: raster, line: this.lineNumber })
           }
@@ -249,7 +249,7 @@ class LexicalAnalyzer {
         case 14:
           raster += this.input[this.currentPos];
           if (Comparator.isBlockComment(raster)) {
-            this.tokens.push({ token: "Block Comment", lexeme: raster, line: this.lineNumber, customCode: 10 })
+            //this.tokens.push({ token: "Block Comment", lexeme: raster, line: this.lineNumber, customCode: 10 })
           } else {
             this.errors.push({ error: "WrongComment", lexeme: raster, line: this.lineNumber })
           }

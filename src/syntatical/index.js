@@ -7,7 +7,11 @@ class SyntaticalAnalyzer {
     this.tokenPointer = 0;
     this.currentToken = this.tokens[this.tokenPointer].token;
     this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
+    this.currentLineNumber = this.tokens[this.tokenPointer].line;
     this.firstSet = [];
+    this.consumedTokens = [];
+    this.ignoredTokens = [];
+    this.errors = [];
     this.mountFirstSets();
   }
 
@@ -71,9 +75,11 @@ class SyntaticalAnalyzer {
 
   accept (expected, checkToken = false) {
     if (checkToken && this.currentToken === expected) {
+      this.consumedTokens.push(this.currentLexeme)
       this.nextToken();
       return true;
     } else if (!checkToken && this.currentLexeme === expected) {
+      this.consumedTokens.push(this.currentLexeme)
       this.nextToken();
       return true;
     }
@@ -84,6 +90,7 @@ class SyntaticalAnalyzer {
   acceptType (except = null) {
     if (this.currentLexeme == except) return false;
     if (Definitions.types.includes(this.currentLexeme)) {
+      this.consumedTokens.push(this.currentLexeme)
       this.nextToken();
       return true;
     }
@@ -94,6 +101,7 @@ class SyntaticalAnalyzer {
     let generalGroup = ["Number", "String", "Identifier"]
     if (this.currentLexeme == except) return false;
     if ((Definitions.boolean.includes(this.currentLexeme) || generalGroup.includes(this.currentToken))) {
+      this.consumedTokens.push(this.currentLexeme)
       this.nextToken();
       return true;
     }
@@ -102,9 +110,11 @@ class SyntaticalAnalyzer {
 
   acceptVectorIndex () {
     if (this.currentToken == 'Identifier') {
+      this.consumedTokens.push(this.currentLexeme)
       this.nextToken();
       return true;
     } else  if (this.currentToken == 'Number' && (this.currentLexeme % 1 === 0 && parseInt(this.currentLexeme) >= 0)) {
+      this.consumedTokens.push(this.currentLexeme)
       this.nextToken();
       return true;
     } else {
@@ -117,7 +127,26 @@ class SyntaticalAnalyzer {
       this.tokenPointer++;
     }
     this.currentToken = this.tokens[this.tokenPointer].token;
-    this.currentLexeme = this.tokens[this.tokenPointer].lexeme; 
+    this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
+    this.lineNumber = this.tokens[this.tokenPointer].line;
+  }
+
+  errorHandler (expected, received, lineNumber) {
+    this.errors.push({ expected, received, line: lineNumber })    
+  }
+
+  sync (tokenSync = [], lexemeSync = []) {
+    let found = false;
+    while (this.tokenPointer < this.tokens.length) {
+      if (tokenSync.includes(this.currentLexeme) || lexemeSync.includes(this.currentLexeme)) {
+        found = true;
+        break;
+      } else {
+        this.ignoredTokens.push(this.tokens[this.tokenPointer])
+        this.nextToken()
+      }
+    }
+    return found
   }
 
   startAnalisys () {
@@ -127,6 +156,7 @@ class SyntaticalAnalyzer {
     this.parseVar();
     this.parseGenerateFuncAndProc()
     this.parseStart();
+    console.table(this.errors)
   }
 
   parseConst () {
@@ -135,7 +165,40 @@ class SyntaticalAnalyzer {
       if (this.match ('{')) {
         this.accept ('{')
         this.parseTypeConst()
+      } else {
+        let tokenSync = []
+        let lexemeSync = ['}', 'typedef', 'var', 'start', 'function', 'procedure']
+        
+        this.errorHandler('{', this.currentLexeme, this.currentLineNumber);
+        this.sync(tokenSync, lexemeSync)
+
+        if (this.tokenPointer < this.tokens.length) {
+          switch (this.currentLexeme) {
+            case 'start':
+              this.parseStart()
+              break;
+            case 'typedef':
+              this.parseStruct()
+              break;
+            case 'var':
+              this.parseVar()
+              break;
+            case 'function':
+              this.parseGenerateFuncAndProc()
+              break;
+            case 'procedure':
+              this.parseGenerateFuncAndProc()
+              break;
+            case '}':
+              this.parseStruct()
+              break;
+            default:
+              break;
+          }
+        }
       }
+    } else {
+      return; // <>
     }
   }
 
@@ -143,6 +206,49 @@ class SyntaticalAnalyzer {
     if (this.matchType()) {
       this.acceptType()
       this.parseConstExpression()
+    } else {
+      let tokenSync = []
+      let lexemeSync = ['int', 'real', 'string', 'boolean','}', 'typedef', 'var', 'start', 'function', 'procedure']
+      
+      this.errorHandler('Attribute Type', this.currentLexeme, this.currentLineNumber);
+      this.sync(tokenSync, lexemeSync)
+
+      if (this.tokenPointer < this.tokens.length) {
+        switch (this.currentLexeme) {
+          case 'start':
+            this.parseStart()
+            break;
+          case 'typedef':
+            this.parseStruct()
+            break;
+          case 'var':
+            this.parseVar()
+            break;
+          case 'function':
+            this.parseGenerateFuncAndProc()
+            break;
+          case 'procedure':
+            this.parseGenerateFuncAndProc()
+            break;
+          case '}':
+            this.parseStruct()
+            break;
+          case 'real':
+            this.parseTypeConst()
+            break;
+          case 'string':
+            this.parseTypeConst()
+            break;
+          case 'int':
+            this.parseTypeConst()
+            break;
+          case 'boolean':
+            this.parseTypeConst()
+            break;
+          default:
+            break;
+        }
+      }
     }
   }
 
@@ -152,6 +258,24 @@ class SyntaticalAnalyzer {
       if (this.matchValue()) {
         this.acceptValue()
         this.parseConstContinuation()
+      } else {
+        let tokenSync = ["Identifier", "String", "Number"]
+        let lexemeSync = [';','}', 'typedef', 'var', 'start', 'function', 'procedure']
+        
+        this.errorHandler('Value to be assigned to constant', this.currentLexeme, this.currentLineNumber);
+        this.sync(tokenSync, lexemeSync)
+  
+        if (this.tokenPointer < this.tokens.length) {
+          if (this.currentLexeme == 'start') {
+            this.parseStart()
+          } else if (this.currentLexeme == 'typedef') {
+            this.parseStruct()
+          } else if (this.currentLexeme == 'var') {
+            this.parseVar()
+          } else if (this.currentLexeme == 'function' || this.currentLexeme == 'procedure') {
+            this.parseGenerateFuncAndProc()
+          }
+        }
       }
     }
   }
@@ -163,15 +287,75 @@ class SyntaticalAnalyzer {
     } else if (this.match(';')) {
       this.accept(';')
       this.parseConstTermination()
+    } else {
+      let tokenSync = []
+      let lexemeSync = ['int', 'real', 'string', 'boolean','}', 'typedef', 'var', 'start', 'function', 'procedure']
+      
+      this.errorHandler(', or ;', this.currentLexeme, this.currentLineNumber);
+      this.sync(tokenSync, lexemeSync)
+
+      if (this.tokenPointer < this.tokens.length) {
+        switch (this.currentLexeme) {
+          case 'start':
+            this.parseStart()
+            break;
+          case 'typedef':
+            this.parseStruct()
+            break;
+          case 'var':
+            this.parseVar()
+            break;
+          case 'function':
+            this.parseGenerateFuncAndProc()
+            break;
+          case 'procedure':
+            this.parseGenerateFuncAndProc()
+            break;
+          case '}':
+            this.parseStruct()
+            break;
+          case 'real':
+            this.parseTypeConst()
+            break;
+          case 'string':
+            this.parseTypeConst()
+            break;
+          case 'int':
+            this.parseTypeConst()
+            break;
+          case 'boolean':
+            this.parseTypeConst()
+            break;
+          default:
+            break;
+        }
+      }
     }
   }
 
   parseConstTermination () {
     if (this.match('}')) {
       this.accept('}')
-      console.log('fechou const');
-    } else {
+    } else if (this.matchType()){
       this.parseTypeConst();
+    } else {
+      let tokenSync = []
+      let lexemeSync = ['typedef', 'var', 'start', 'function', 'procedure']
+      
+      this.errorHandler('}', this.currentLexeme, this.currentLineNumber);
+      this.sync(tokenSync, lexemeSync)
+
+      if (this.tokenPointer < this.tokens.length) {
+        if (this.currentLexeme == 'start') {
+          this.parseStart()
+        } else if (this.currentLexeme == 'typedef') {
+          this.parseStruct()
+        } else if (this.currentLexeme == 'var') {
+          this.parseVar()
+        } else if (this.currentLexeme == 'function' || this.currentLexeme == 'procedure') {
+          this.parseGenerateFuncAndProc()
+        }
+      }
     }
   }
 
@@ -183,8 +367,66 @@ class SyntaticalAnalyzer {
         if (this.match('Identifier', true)) {
           this.accept('Identifier', true)
           this.parseStructExtends();
+        } else {
+          let tokenSync = []
+          let lexemeSync = ['{', 'var', 'start', 'function', 'procedure']
+          
+          this.errorHandler('Identifier', this.currentLexeme, this.currentLineNumber);
+          this.sync(tokenSync, lexemeSync)
+    
+          if (this.tokenPointer < this.tokens.length) {
+            switch (this.currentLexeme) {
+              case 'start':
+                this.parseStart()
+                break;
+              case 'var':
+                this.parseVar()
+                break;
+              case 'function':
+                this.parseGenerateFuncAndProc()
+                break;
+              case 'procedure':
+                this.parseGenerateFuncAndProc()
+                break;
+              case '{':
+                this.parseStruct()
+                break;
+              default:
+                break;
+            }
+          }
+        }
+      } else {
+        let tokenSync = []
+        let lexemeSync = ['{', 'var', 'start', 'function', 'procedure']
+        
+        this.errorHandler('struct', this.currentLexeme, this.currentLineNumber);
+        this.sync(tokenSync, lexemeSync)
+  
+        if (this.tokenPointer < this.tokens.length) {
+          switch (this.currentLexeme) {
+            case 'start':
+              this.parseStart()
+              break;
+            case 'var':
+              this.parseVar()
+              break;
+            case 'function':
+              this.parseGenerateFuncAndProc()
+              break;
+            case 'procedure':
+              this.parseGenerateFuncAndProc()
+              break;
+            case '{':
+              this.parseStruct()
+              break;
+            default:
+              break;
+          }
         }
       }
+    } else {
+      return; // <>
     }
   }
 
@@ -656,6 +898,20 @@ class SyntaticalAnalyzer {
       if (this.match('(')) {
         this.accept('(')
         this.parsePrintContent()
+      } else {
+          let tokenSync = ['Identifier']
+          let lexemeSync = ['}', 'start'].concat(this.firstSet['commands'])
+          
+          this.errorHandler('(', this.currentLexeme, this.currentLineNumber);
+          this.sync(tokenSync, lexemeSync)
+
+          if (this.tokenPointer < this.tokens.length) {
+            if (this.matchFirstSet(this.currentLexeme, 'commands')) {
+              this.parseCommands()
+            } else if (this.currentLexeme == 'start') {
+              this.parseStart()
+            }
+          }
       }
     }
   }
@@ -664,9 +920,23 @@ class SyntaticalAnalyzer {
     if (this.match('String', true) || this.match('Number') || this.match('Identifier', true)) {
       this.accept(this.currentToken, true);
       this.parsePrintContinuation()
-    } else if (this.matchFirstSet('scope')) {
+    } else if (this.matchFirstSet(this.currentLexeme, 'scope')) {
       this.accept(this.currentLexeme);
       this.parsePrintContinuation()
+    } else {
+        let tokenSync = ['Identifier']
+        let lexemeSync = ['}', 'start'].concat(this.firstSet['commands'])
+        
+        this.errorHandler('Identifier, String, Number or Function', this.currentLexeme, this.currentLineNumber);
+        this.sync(tokenSync, lexemeSync)
+
+        if (this.tokenPointer < this.tokens.length) {
+          if (this.matchFirstSet(this.currentLexeme, 'commands')) {
+            this.parseCommands()
+          } else if (this.currentLexeme == 'start') {
+            this.parseStart()
+          }
+        }
     }
   }
 
@@ -685,6 +955,20 @@ class SyntaticalAnalyzer {
       if (this.match(';')) {
         this.accept(';')
         return
+      } else {
+        let tokenSync = ['Identifier']
+        let lexemeSync = ['}', 'start'].concat(this.firstSet['commands'])
+        
+        this.errorHandler(';', this.currentLexeme, this.currentLineNumber);
+        this.sync(tokenSync, lexemeSync)
+
+        if (this.tokenPointer < this.tokens.length) {
+          if (this.matchFirstSet(this.currentLexeme, 'commands')) {
+            this.parseCommands()
+          } else if (this.currentLexeme == 'start') {
+            this.parseStart()
+          }
+        }
       }
     }
   }
@@ -700,7 +984,7 @@ class SyntaticalAnalyzer {
   }
 
   parseReadContent () {
-    if (this.match('String', true) || this.match('Number') || this.match('Identifier', true) || this.matchFirstSet('scope')) {
+    if (this.match('String', true) || this.match('Number') || this.match('Identifier', true) || this.matchFirstSet(this.currentLexeme, 'scope')) {
       this.parseIdentifierWithoutFunction()
       this.parseReadContinuation()
     }
@@ -758,13 +1042,13 @@ class SyntaticalAnalyzer {
       this.parsePrint()
     } else if (this.match('return')) {
       this.parseReturn()
-    } else if (this.match('Identifier', true) || this.matchFirstSet('scope')) {
+    } else if (this.match('Identifier', true) || this.matchFirstSet(this.currentLexeme, 'scope')) {
       this.parseIdentifierCommands()
     }
   }
   
   parseIdentifierCommands () {
-    if (this.match('String', true) || this.match('Number') || this.match('Identifier', true) || this.matchFirstSet('scope')) {
+    if (this.match('String', true) || this.match('Number') || this.match('Identifier', true) || this.matchFirstSet(this.currentLexeme, 'scope')) {
       this.parseIdentifierWithoutFunction()
       this.parseIdentifierCommands2()
       if (this.match(';')) {
@@ -807,7 +1091,7 @@ class SyntaticalAnalyzer {
     if (this.match(';')) {
       this.accept(';')
       return
-    } else if (this.matchFirstSet('arithmetic_expression', true)
+    } else if (this.matchFirstSet(this.currentLexeme, 'arithmetic_expression')
       || this.match('Number', true)
       || this.match('Identifier', true)) {
 
@@ -824,7 +1108,6 @@ class SyntaticalAnalyzer {
    */
 
   parseGenerateFuncAndProc () {
-    console.log(this.currentLexeme)
     if (this.match('function')) {
       this.parseFunction();
       this.parseGenerateFuncAndProc();
