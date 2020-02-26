@@ -3,7 +3,7 @@ Lista de Tokens:
 1 { Delimiter
 2 int Reserved Word
 2 a Identifier
-2 -2 Number
+2 2 Number
 2 ; Delimiter
 3 string Reserved Word
 3 c Identifier
@@ -31,7 +31,7 @@ Lista de Tokens:
 13 int Reserved Word
 13 a Identifier
 13 [ Delimiter
-13 b Identifier
+13 2 Number
 13 ] Delimiter
 13 ; Delimiter
 14 int Reserved Word

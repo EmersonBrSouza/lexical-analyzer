@@ -12,12 +12,39 @@ class SyntaticalAnalyzer {
   }
 
   match (expected, checkToken = false) {
-    if (checkToken && this.currentToken == expected) {
+    if (checkToken && this.currentToken === expected) {
       return true;
-    } else if (!checkToken && this.currentLexeme == expected) {
+    } else if (!checkToken && this.currentLexeme === expected) {
       return true;
     }
     return false;
+  }
+
+  matchType (except = null) {
+    if (this.currentLexeme == except) return false;
+    if (Definitions.types.includes(this.currentLexeme)) {
+      return true;
+    }
+    return false;
+  }
+
+  matchValue (except = null) {
+    let generalGroup = ["Number", "String", "Identifier"]
+    if (this.currentLexeme == except) return false;
+    if ((Definitions.boolean.includes(this.currentLexeme) || generalGroup.includes(this.currentToken))) {
+      return true;
+    }
+    return false;
+  }
+
+  matchVectorIndex () {
+    if (this.currentToken == 'Identifier') {
+      return true;
+    } else  if (this.currentToken == 'Number' && (this.currentLexeme % 1 === 0 && parseInt(this.currentLexeme) >= 0)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   isBoolean (except = null) {
@@ -43,13 +70,14 @@ class SyntaticalAnalyzer {
 
 
   accept (expected, checkToken = false) {
-    if (checkToken && this.currentToken == expected) {
+    if (checkToken && this.currentToken === expected) {
       this.nextToken();
       return true;
-    } else if (!checkToken && this.currentLexeme == expected) {
+    } else if (!checkToken && this.currentLexeme === expected) {
       this.nextToken();
       return true;
     }
+    console.table([{ expected, received: this.currentLexeme, receivedToken: this.currentToken, checkToken }])
     return false;
   }
 
@@ -100,47 +128,58 @@ class SyntaticalAnalyzer {
   }
 
   parseConst () {
-    if (this.accept('const')) {
-      if (this.accept ('{')) {
+    if (this.match('const')) {
+      this.accept('const')
+      if (this.match ('{')) {
+        this.accept ('{')
         this.parseTypeConst()
       }
     }
   }
 
   parseTypeConst () {
-    if (this.acceptType()) {
+    if (this.matchType()) {
+      this.acceptType()
       this.parseConstExpression()
     }
   }
 
   parseConstExpression () {
-    if(this.accept('Identifier', true)) {
-      if (this.acceptValue()) {
+    if(this.match('Identifier', true)) {
+      this.accept('Identifier', true)
+      if (this.matchValue()) {
+        this.acceptValue()
         this.parseConstContinuation()
       }
     }
   }
 
   parseConstContinuation () {
-    if (this.accept(',')) {
+    if (this.match(',')) {
+      this.accept(',')
       this.parseConstExpression()
-    } else if (this.accept(';')) {
+    } else if (this.match(';')) {
+      this.accept(';')
       this.parseConstTermination()
     }
   }
 
   parseConstTermination () {
-    if (this.accept('}')) {
-      console.log('fechou');
+    if (this.match('}')) {
+      this.accept('}')
+      console.log('fechou const');
     } else {
       this.parseTypeConst();
     }
   }
 
   parseStruct () {
-    if (this.accept('typedef')) {
-      if (this.accept('struct')) {
-        if (this.accept('Identifier', true)) {
+    if (this.match('typedef')) {
+      this.accept('typedef')
+      if (this.match('struct')) {
+        this.accept('struct')
+        if (this.match('Identifier', true)) {
+          this.accept('Identifier', true)
           this.parseStructExtends();
         }
       }
@@ -148,38 +187,46 @@ class SyntaticalAnalyzer {
   }
 
   parseStructExtends () {
-    if (this.accept('extends')) {
-      if (this.accept('{')) {
+    if (this.match('extends')) {
+      this.accept('extends')
+      if (this.match('{')) {
+        this.accept('{')
         this.parseTypeStruct()
       }
-    } else if (this.accept('{')) {
+    } else if (this.match('{')) {
+      this.accept('{')
       this.parseTypeStruct()
     }
   }
 
   parseTypeStruct () {
-    if (this.acceptType()) {
+    if (this.matchType()) {
+      this.acceptType()
       this.parseStructExpression()
     }
   }
 
   parseStructExpression () {
-    if(this.accept('Identifier', true)) {
+    if(this.match('Identifier', true)) {
+      this.accept('Identifier', true)
       this.parseStructContinuation()
     }
   }
 
   parseStructContinuation () {    
-    if (this.accept(',')) {
+    if (this.match(',')) {
+      this.accept(',')
       this.parseStructExpression()
-    } else if (this.accept(';')) {
+    } else if (this.match(';')) {
+      this.accept(';')
       this.parseStructTermination()
     }
   }
 
   parseStructTermination () {
-    if (this.accept('}')) {
-      console.log('fechou');
+    if (this.match('}')) {
+      this.accept('}')
+      console.log('fechou struct');
     } else {
       this.parseTypeStruct();
     }
@@ -187,8 +234,10 @@ class SyntaticalAnalyzer {
 
   // Relative to Var
   parseVar () {
-    if (this.accept('var')) {
-      if (this.accept ('{')) {
+    if (this.match('var')) {
+      this.accept('var')
+      if (this.match ('{')) {
+        this.accept ('{')
         this.parseTypeVar()
       }
     }
@@ -196,26 +245,32 @@ class SyntaticalAnalyzer {
 
   // Relative to TipoVar
   parseTypeVar () {
-    if (this.acceptType()) {
+    if (this.matchType()) {
+      this.acceptType()
       this.parseVarExpression()
     }
   }
 
   // Relative to IdVar
   parseVarExpression () {
-    if(this.accept('Identifier', true)) {
+    if(this.match('Identifier', true)) {
+      this.accept('Identifier', true)
       this.parseVarContinuation()
     }
   }
 
   // Relative to Var2
   parseVarContinuation () {
-    if (this.accept(',')) {
+    if (this.match(',')) {
+      this.accept(',')
       this.parseVarExpression()
-    } else if (this.accept(';')) {
+    } else if (this.match(';')) {
+      this.accept(';')
       this.parseVarTermination()
-    } else if (this.accept('=')) { 
-      if (this.acceptValue()) {
+    } else if (this.match('=')) { 
+      this.accept('=')
+      if (this.matchValue()) {
+        this.acceptValue()
         this.parseVarAttribuition();
       }
     } else if (this.match('[')) {
@@ -225,17 +280,20 @@ class SyntaticalAnalyzer {
 
   // Relative to Var4
   parseVarAttribuition () {
-    if (this.accept(',')) {
+    if (this.match(',')) {
+      this.accept(',')
       this.parseVarExpression();
-    } else if (this.accept(';')) {
+    } else if (this.match(';')) {
+      this.accept(';')
       this.parseVarTermination();
     }
   }
 
   // Relative to Var3
   parseVarTermination () {
-    if (this.accept('}')) {
-      console.log('fechou');
+    if (this.match('}')) {
+      this.accept('}')
+      console.log('fechou var');
     } else {
       this.parseTypeVar();
     }
@@ -243,9 +301,12 @@ class SyntaticalAnalyzer {
 
   // Relative to Vetor
   parseVector () {
-    if (this.accept('[')) {
-      if(this.acceptVectorIndex()) {
-        if (this.accept(']')) {
+    if (this.match('[')) {
+      this.accept('[')
+      if(this.matchVectorIndex()) {
+        this.acceptVectorIndex()
+        if (this.match(']')) {
+          this.accept(']')
           this.parseMatrix();
         }
       }
@@ -254,9 +315,12 @@ class SyntaticalAnalyzer {
 
   // Relative to Matriz
   parseMatrix () {
-    if (this.accept('[')) {
-      if(this.acceptVectorIndex()) {
-        if (this.accept(']')) {
+    if (this.match('[')) {
+      this.accept('[')
+      if(this.matchVectorIndex()) {
+        this.acceptVectorIndex()
+        if (this.match(']')) {
+          this.accept(']')
           this.parseVarAttribuition();
         }
       }
@@ -275,7 +339,8 @@ class SyntaticalAnalyzer {
 
   // Relative to ContListaParametros
   parseParametersListContinuation () {
-    if (this.accept(',')) {
+    if (this.match(',')) {
+      this.accept(',')
       this.parseParametersList()
     }
   }
@@ -293,10 +358,12 @@ class SyntaticalAnalyzer {
   parseIdentifier () {
     if (this.matchFirstSet(this.currentLexeme, 'scope')) {
       this.parseScope()
-      if (this.accept('Identifier', true)) {
+      if (this.match('Identifier', true)) {
+        this.accept('Identifier', true)
         this.parseIdentifierAccess()
       }
-    } else if(this.accept('Identifier', true)){
+    } else if(this.match('Identifier', true)) {
+      this.accept('Identifier', true)
       this.parseIdentifierAppendix()
     }
   }
@@ -314,19 +381,26 @@ class SyntaticalAnalyzer {
 
   // Relative to Identificador2
   parseIdentifierAccess () {
-    if (this.accept('.')) {
-      if (this.accept('Identifier', true)) {
+    if (this.match('.')) {
+      this.accept('.')
+      if (this.match('Identifier', true)) {
+        this.accept('Identifier', true)
         this.parseVectorDeclaration()
       }
     } else if (this.match('[')) {
       this.parseVectorDeclaration()
+    } else { // Se for vazio
+      this.nextToken()
     }
   }
 
   parseVectorDeclaration () {
-    if (this.accept('[')) {
+    if (this.match('[')) {
+      this.accept('[')
       if (this.acceptVectorIndex()) {
-        if (this.accept(']')) {
+        this.matchVectorIndex()
+        if (this.match(']')) {
+          this.accept(']')
           this.parseVectorNewDimension()
           this.parseVectorAccess()
         }
@@ -338,9 +412,12 @@ class SyntaticalAnalyzer {
 
   // Relative to Vetor2
   parseVectorNewDimension () {
-    if (this.accept('[')) {
-      if (this.acceptVectorIndex()) {
-        if (this.accept(']')) {
+    if (this.match('[')) {
+      this.accept('[')
+      if (this.matchVectorIndex()) {
+        this.acceptVectorIndex()
+        if (this.match(']')) {
+          this.accept(']')
           this.parseVectorNewDimension()
           this.parseVectorAccess()
         }
@@ -351,8 +428,10 @@ class SyntaticalAnalyzer {
 
   // Relative to Identificador 4
   parseVectorAccess () {
-    if (this.accept('.')) {
-      if (this.accept('Identifier', true)) {
+    if (this.match('.')) {
+      this.accept('.')
+      if (this.match('Identifier', true)) {
+        this.accept('Identifier', true)
         this.parseVectorDeclaration()
       }
     }
@@ -360,8 +439,10 @@ class SyntaticalAnalyzer {
 
   parseScope () {
     if (this.matchFirstSet(this.currentLexeme, 'scope')) {
-      if (this.accept(this.currentLexeme)) {
-        if (this.accept('.')) {
+      if (this.match(this.currentLexeme)) {
+        this.accept(this.currentLexeme)
+        if (this.match('.')) {
+          this.accept('.')
           return;
         }
       }
@@ -371,7 +452,8 @@ class SyntaticalAnalyzer {
   parseIdentifierWithoutFunction () {
     if (this.matchFirstSet(this.currentLexeme, 'scope')) {
       this.accept(this.currentLexeme);
-      if (this.accept('Identifier', true)) {
+      if (this.match('Identifier', true)) {
+        this.accept('Identifier', true)
         this.parseIdentifierAccess()
       }
     } else if (this.match('Identifier', true)) {
@@ -385,7 +467,13 @@ class SyntaticalAnalyzer {
       this.parseE2()
     } else if (this.matchFirstSet(this.currentLexeme, 'scope') || this.match('Identifier', true)) {
       this.parseArithmeticIdentifier()
-    } else if (this.accept('++') || this.accept('--')) {
+    } else if (this.match('++')) {
+      this.accept('++')
+      this.parseIdentifierWithoutFunction()
+      this.parseT2()
+      this.parseE2()
+    } else if (this.match('--')) {
+      this.accept('--')
       this.parseIdentifierWithoutFunction()
       this.parseT2()
       this.parseE2()
@@ -393,15 +481,25 @@ class SyntaticalAnalyzer {
   }
 
   parseArithmeticExpression2 () {
-    if (this.accept('++') || this.accept('--') || this.matchFirstSet(this.currentLexeme,'t2')) {
+    if (this.match('++')) {
+      this.accept('++')
+      this.parseE2()
+    } else if (this.match('--')) {
+      this.accept('--')
+      this.parseE2()
+    } else if (this.matchFirstSet(this.currentLexeme,'t2')) {
       this.parseE2()
     }
   }
 
   parseE2() {
-    if (this.accept('+') || this.accept('-')) {
+    if (this.match('+')) {
+      this.accept('+')
       this.parseArithmeticExpression()
-    } 
+    } else if (this.match('-')) {
+      this.accept('-')
+      this.parseArithmeticExpression()
+    }
   }
 
   parseT () {
@@ -410,18 +508,25 @@ class SyntaticalAnalyzer {
   }
 
   parseT2 () {
-    if (this.accept('*') || this.accept('/')) {
+    if (this.match('*')) {
+      this.accept('*')
       this.parseArithmeticExpression()
-    } 
+    } else if (this.match('/')) {
+      this.accept('/')
+      this.parseArithmeticExpression()
+    }
   }
 
   parseF () {
-    if (this.accept('(')) {
+    if (this.match('(')) {
+      this.accept('(')
       this.parseArithmeticExpression()
-      if (this.accept(')')) {
+      if (this.match(')')) {
+        this.accept(')')
         return
       }
-    } else if (this.accept('Number', true)) {
+    } else if (this.match('Number', true)) {
+      this.accept('Number', true)
       return
     }
   }
@@ -429,11 +534,13 @@ class SyntaticalAnalyzer {
   parseArithmeticIdentifier () {
     if (this.matchFirstSet(this.currentLexeme, 'scope')) {
       this.accept(this.currentLexeme)
-      if (this.accept('Identifier', true)) {
+      if (this.match('Identifier', true)) {
+        this.accept('Identifier', true)
         this.parseIdentifierAccess()
         this.parseArithmeticExpression2()
       }
-    } else if (this.accept('Identifier', true)) {
+    } else if (this.match('Identifier', true)) {
+      this.accept('Identifier', true)
       this.parseArithmeticIdentifier3()
     }
 
@@ -443,9 +550,11 @@ class SyntaticalAnalyzer {
     if (this.matchFirstSet(this.currentLexeme, 'identifier_access')) {
       this.parseIdentifierAccess()
       this.parseArithmeticExpression2()
-    } else if (this.accept('(')) {
+    } else if (this.match('(')) {
+      this.accept('(')
       this.parseParametersList()
-      if (this.accept(')')) {
+      if (this.match(')')) {
+        this.accept(')')
         this.parseT2()
         this.parseE2()
       }
@@ -460,9 +569,11 @@ class SyntaticalAnalyzer {
       || this.match('Number', true)
       || this.match('Identifier', true) ) {
       this.parseLRExpression()
-    } else if (this.accept('(')) {
+    } else if (this.match('(')) {
+      this.accept('(')
       this.parseLRExpression()
-      if (this.accept(')')) {
+      if (this.match(')')) {
+        this.accept(')')
         this.parseLRExpression3()
       }
     }
@@ -538,39 +649,49 @@ class SyntaticalAnalyzer {
   }
 
   parsePrint () {
-    if (this.accept('print')) {
-      if (this.accept('(')) {
+    if (this.match('print')) {
+      this.accept('print')
+      if (this.match('(')) {
+        this.accept('(')
         this.parsePrintContent()
       }
     }
   }
 
   parsePrintContent () {
-    if (this.match('String', true) || this.match('Number') || this.match('Identifier', true) || this.matchFirstSet('scope')) {
-      this.accept(this.currentLexeme, true);
+    if (this.match('String', true) || this.match('Number') || this.match('Identifier', true)) {
+      this.accept(this.currentToken, true);
+      this.parsePrintContinuation()
+    } else if (this.matchFirstSet('scope')) {
+      this.accept(this.currentLexeme);
       this.parsePrintContinuation()
     }
   }
 
   parsePrintContinuation () {
-    if (this.accept(',')) {
+    if (this.match(',')) {
+      this.accept(',')
       this.parsePrintContent()
     } else if(this.match(')')) {
-      this.printEnd();
+      this.parsePrintEnd();
     }
   }
 
   parsePrintEnd () {
-    if (this.accept(')')) {
-      if (this.accept(';')) {
+    if (this.match(')')) {
+      this.accept(')')
+      if (this.match(';')) {
+        this.accept(';')
         return
       }
     }
   }
 
   parseRead () {
-    if (this.accept('read')) {
-      if (this.accept('(')) {
+    if (this.match('read')) {
+      this.accept('read')
+      if (this.match('(')) {
+        this.accept('(')
         this.parseReadContent()
       }
     }
@@ -584,7 +705,8 @@ class SyntaticalAnalyzer {
   }
 
   parseReadContinuation () {
-    if (this.accept(',')) {
+    if (this.match(',')) {
+      this.accept(',')
       this.parseReadContent()
     } else if(this.match(')')) {
       this.readEnd();
@@ -592,8 +714,10 @@ class SyntaticalAnalyzer {
   }
 
   parseReadEnd () {
-    if (this.accept(')')) {
-      if (this.accept(';')) {
+    if (this.match(')')) {
+      this.accept(')')
+      if (this.match(';')) {
+        this.accept(';')
         return
       }
     }
@@ -603,10 +727,12 @@ class SyntaticalAnalyzer {
     if (this.match('var')) {
       this.parseVar();
       this.parseBody2();
-      if (this.accept('}')) {
+      if (this.match('}')) {
+        this.accept('}')
         console.log('fechou func');
       }
-    } else if (this.accept('}')) {
+    } else if (this.match('}')) {
+      this.accept('}')
       console.log('fechou func');
     }
   }
@@ -638,18 +764,22 @@ class SyntaticalAnalyzer {
     if (this.match('String', true) || this.match('Number') || this.match('Identifier', true) || this.matchFirstSet('scope')) {
       this.parseIdentifierWithoutFunction()
       this.parseIdentifierCommands2()
-      if (this.accept(';')) {
+      if (this.match(';')) {
+        this.accept(';')
         return
       }
     }
   }
 
   parseIdentifierCommands2 () {
-    if (this.accept('=')) {
+    if (this.match('=')) {
+      this.accept('=')
       this.parseIdentifierCommands2_1()
-    } else if (this.accept('(')) {
+    } else if (this.match('(')) {
+      this.accept('(')
       this.parseParametersList();
-      if (this.accept(')')) {
+      if (this.match(')')) {
+        this.accept(')')
         return
       }
     }
@@ -664,20 +794,23 @@ class SyntaticalAnalyzer {
   }
 
   parseReturn () {
-    if (this.accept('return')) {
+    if (this.match('return')) {
+      this.accept('return')
       this.parseReturnCode()
     }
   }
 
   parseReturnCode () {
-    if (this.accept(';')) {
+    if (this.match(';')) {
+      this.accept(';')
       return
     } else if (this.matchFirstSet('arithmetic_expression', true)
       || this.match('Number', true)
       || this.match('Identifier', true)) {
 
       this.parseArithmeticExpression()
-      if (this.accept(';')) {
+      if (this.match(';')) {
+        this.accept(';')
         return
       }
     }
@@ -688,6 +821,7 @@ class SyntaticalAnalyzer {
    */
 
   parseGenerateFuncAndProc () {
+    console.log(this.currentLexeme)
     if (this.match('function')) {
       this.parseFunction();
       this.parseGenerateFuncAndProc();
@@ -698,10 +832,14 @@ class SyntaticalAnalyzer {
   }
 
   parseFunction () {
-    if (this.accept('function')) {
-      if (this.acceptType()) {
-        if (this.accept('Identifier', true)) {
-          if (this.accept('(')) {
+    if (this.match('function')) {
+      this.accept('function')
+      if (this.matchType()) {
+        this.acceptType()
+        if (this.match('Identifier', true)) {
+          this.accept('Identifier', true)
+          if (this.match('(')) {
+            this.accept('(')
             this.parseParam();
           }
         }
@@ -710,10 +848,14 @@ class SyntaticalAnalyzer {
   }
 
   parseProcedure () {
-    if (this.accept('procedure')) {
-      if (this.accept('Identifier', true)) {
+    console.log('abriu procedure')
+    if (this.match('procedure')) {
+      this.accept('procedure')
+      if (this.match('Identifier', true)) {
+        this.accept('Identifier', true)
         this.nextToken();
-        if (this.accept('(')) {
+        if (this.match('(')) {
+          this.accept('(')
           this.nextToken();
           this.parseParam();
         }
@@ -722,8 +864,10 @@ class SyntaticalAnalyzer {
   }
 
   parseParam () {
-    if (this.acceptType()) {
-      if(this.accept('Identifier', true)) {
+    if (this.matchType()) {
+      this.acceptType()
+      if(this.match('Identifier', true)) {
+        this.accept('Identifier', true)
         this.parseParam2()
         this.parseParam1()
       }
@@ -731,43 +875,55 @@ class SyntaticalAnalyzer {
   }
 
   parseParam1 () {
-    if (this.accept(',')) {
+    if (this.match(',')) {
+      this.accept(',')
       this.parseParam();
-    } else if (this.accept(')')) {
+    } else if (this.match(')')) {
+      this.accept(')')
       this.parseF2();
     }
   }
 
   parseParam2 () {
-    if (this.accept('[')) {
-      if (this.accept(']')) {
+    if (this.match('[')) {
+      this.accept('[')
+      if (this.match(']')) {
+        this.accept(']')
         this.parseParam3();
       }
     }
   }
 
   parseParam3 () {
-    if (this.accept('[')) {
-      if (this.accept(']')) {
+    if (this.match('[')) {
+      this.accept('[')
+      if (this.match(']')) {
+        this.accept(']')
         return
       }
     }
   }
 
   parseF2 () {
-    if (this.accept('{')) {
+    if (this.match('{')) {
+      this.accept('{')
       console.log('abriu func');
       this.parseBody();
     }
   }
 
   parseStart() {
-    if (this.accept('start')) {
-      if (this.accept('(')) {
-        if (this.accept(')')) {
-          if (this.accept('{')) {
+    if (this.match('start')) {
+      this.accept('start')
+      if (this.match('(')) {
+        this.accept('(')
+        if (this.match(')')) {
+          this.accept(')')
+          if (this.match('{')) {
+            this.accept('{')
             this.parseBody()
-            if (this.accept('}')) {
+            if (this.match('}')) {
+              this.accept('}')
               return
             }
           }
@@ -777,13 +933,18 @@ class SyntaticalAnalyzer {
   }
 
   parseLoop () {
-    if(this.accept('while')) {
-      if (this.accept('(')) {
+    if(this.match('while')) {
+      this.accept('while')
+      if (this.match('(')) {
+        this.accept('(')
         this.parseLogicalRelationalExpression();
-        if (this.accept(')')) {
-          if (this.accept('{')) {
+        if (this.match(')')) {
+          this.accept(')')
+          if (this.match('{')) {
+            this.accept('{')
             this.parseBody();
-            if (this.accept( '}')) {
+            if (this.match( '}')) {
+              this.accept( '}')
               console.log('fechou while')
               return
             }
@@ -794,14 +955,20 @@ class SyntaticalAnalyzer {
   }
 
   parseConditional () {
-    if(this.accept('if')) {
-      if (this.accept('(')) {
+    if(this.match('if')) {
+      this.accept('if')
+      if (this.match('(')) {
+        this.accept('(')
         this.parseLogicalRelationalExpression();
-        if (this.accept(')')) {
-          if (this.accept('then')) {
-            if (this.accept('{')) {
+        if (this.match(')')) {
+          this.accept(')')
+          if (this.match('then')) {
+            this.accept('then')
+            if (this.match('{')) {
+              this.accept('{')
               this.parseBody();
-              if (this.accept('}')) {
+              if (this.match('}')) {
+                this.accept('}')
                 this.parseConditionalEnd();
               }
             }
@@ -812,10 +979,13 @@ class SyntaticalAnalyzer {
   }
 
   parseConditionalEnd () {
-    if (this.accept('else')) {
-      if (this.accept('{')) {
+    if (this.match('else')) {
+      this.accept('else')
+      if (this.match('{')) {
+        this.accept('{')
         this.parseBody()
-        if (this.accept('}')) {
+        if (this.match('}')) {
+          this.accept('}')
           return
         }
       }

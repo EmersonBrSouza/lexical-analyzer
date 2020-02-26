@@ -1,5 +1,5 @@
 const {
-  int a -2;
+  int a 2;
   string c "ola";
 }
 
@@ -10,7 +10,7 @@ typedef struct o {
 var {
   int c = 2;
   int a;
-  int a[b];
+  int a[2];
   int b[c][a];
 }
 
