@@ -1,54 +1,106 @@
-const Definitions = require('./syntax_definitions');
+const Definitions = require("./syntax_definitions");
 
 class SyntaticalAnalyzer {
-
-  constructor (tokens) {
+  constructor(tokens) {
     this.tokens = tokens;
     this.tokenPointer = 0;
-    this.currentToken = this.tokens[this.tokenPointer].token;
     this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
-    this.currentLineNumber = this.tokens[this.tokenPointer].line;
+    this.currentToken = this.tokens[this.tokenPointer].token;
+    this.currentLine = this.tokens[this.tokenPointer].line;
     this.firstSet = [];
-    this.consumedTokens = [];
-    this.ignoredTokens = [];
     this.errors = [];
     this.mountFirstSets();
   }
 
-  match (expected, checkToken = false) {
-    if (checkToken && this.currentToken === expected) {
-      return true;
-    } else if (!checkToken && this.currentLexeme === expected) {
-      return true;
-    }
-    return false;
+  eof() {
+    return this.tokenPointer == this.tokens.length;
   }
 
-  matchType (except = null) {
-    if (this.currentLexeme == except) return false;
-    if (Definitions.types.includes(this.currentLexeme)) {
-      return true;
+  check(lexeme, searchByType) {
+    if (searchByType) {
+      if (lexeme == this.currentToken) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (lexeme == this.currentLexeme) {
+        return true;
+      } else {
+        return false;
+      }
     }
-    return false;
   }
 
-  matchValue (except = null) {
-    let generalGroup = ["Number", "String", "Identifier"]
-    if (this.currentLexeme == except) return false;
-    if ((Definitions.boolean.includes(this.currentLexeme) || generalGroup.includes(this.currentToken))) {
-      return true;
-    }
-    return false;
+  checkType() {
+    return Definitions.types.includes(this.currentLexeme);
   }
 
-  matchVectorIndex () {
-    if (this.currentToken == 'Identifier') {
+  checkValue() {
+    let generalGroup = ["Number", "String", "Identifier"];
+    return (
+      Definitions.boolean.includes(this.currentLexeme) ||
+      generalGroup.includes(this.currentToken)
+    );
+  }
+
+  checkVectorIndex() {
+    if (this.currentToken == "Identifier") {
       return true;
-    } else  if (this.currentToken == 'Number' && (this.currentLexeme % 1 === 0 && parseInt(this.currentLexeme) >= 0)) {
+    } else if (
+      this.currentToken == "Number" &&
+      this.currentLexeme % 1 === 0 &&
+      parseInt(this.currentLexeme) >= 0
+    ) {
       return true;
     } else {
       return false;
     }
+  }
+
+  consume(lexeme, searchByType = false) {
+    if (this.check(lexeme, searchByType)) {
+      this.nextToken();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  consumeType() {
+    if (this.checkType()) {
+      this.consume(this.currentLexeme);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  consumeValue() {
+    if (this.checkValue()) {
+      this.consume(this.currentLexeme);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  consumeVectorIndex() {
+    if (this.checkVectorIndex()) {
+      this.consume(this.currentLexeme);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  nextToken() {
+    if (this.tokenPointer + 1 > this.tokens.length) return;
+    this.tokenPointer++;
+    this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
+    this.currentToken = this.tokens[this.tokenPointer].token;
+    this.currentLine = this.tokens[this.tokenPointer].line;
+    console.log(this.currentLexeme);
   }
 
   isBoolean (except = null) {
@@ -72,945 +124,231 @@ class SyntaticalAnalyzer {
     return false;
   }
 
-
-  accept (expected, checkToken = false) {
-    if (checkToken && this.currentToken === expected) {
-      this.consumedTokens.push(this.currentLexeme)
-      this.nextToken();
-      return true;
-    } else if (!checkToken && this.currentLexeme === expected) {
-      this.consumedTokens.push(this.currentLexeme)
-      this.nextToken();
-      return true;
-    }
-    console.table([{ expected, received: this.currentLexeme, receivedToken: this.currentToken, checkToken }])
-    return false;
+  handleError(expected, received, line) {
+    console.log(
+      `Esperava '${expected}' mas recebeu '${received}' na linha ${line}`
+    );
   }
 
-  acceptType (except = null) {
-    if (this.currentLexeme == except) return false;
-    if (Definitions.types.includes(this.currentLexeme)) {
-      this.consumedTokens.push(this.currentLexeme)
-      this.nextToken();
-      return true;
-    }
-    return false;
-  }
-
-  acceptValue (except = null) {
-    let generalGroup = ["Number", "String", "Identifier"]
-    if (this.currentLexeme == except) return false;
-    if ((Definitions.boolean.includes(this.currentLexeme) || generalGroup.includes(this.currentToken))) {
-      this.consumedTokens.push(this.currentLexeme)
-      this.nextToken();
-      return true;
-    }
-    return false;
-  }
-
-  acceptVectorIndex () {
-    if (this.currentToken == 'Identifier') {
-      this.consumedTokens.push(this.currentLexeme)
-      this.nextToken();
-      return true;
-    } else  if (this.currentToken == 'Number' && (this.currentLexeme % 1 === 0 && parseInt(this.currentLexeme) >= 0)) {
-      this.consumedTokens.push(this.currentLexeme)
-      this.nextToken();
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  nextToken () {
-    if (this.tokenPointer + 1 < this.tokens.length) {
-      this.tokenPointer++;
-    }
-    this.currentToken = this.tokens[this.tokenPointer].token;
-    this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
-    this.currentLineNumber = this.tokens[this.tokenPointer].line;
-  }
-
-  errorHandler (expected, received, lineNumber) {
-    this.errors.push({ expected, received, line: lineNumber })    
-  }
-
-  sync (tokenSync = [], lexemeSync = []) {
+  sync(followSet) {
     let found = false;
     while (this.tokenPointer < this.tokens.length) {
-      if (tokenSync.includes(this.currentLexeme) || lexemeSync.includes(this.currentLexeme)) {
+      if (
+        followSet.tokens.includes(this.currentToken) ||
+        followSet.lexemes.includes(this.currentLexeme)
+      ) {
         found = true;
         break;
       } else {
-        this.ignoredTokens.push(this.tokens[this.tokenPointer])
-        this.nextToken()
+        this.nextToken();
       }
     }
-    return found
+    return found;
   }
 
-  startAnalisys () {
-    console.table(this.tokens)
+  startAnalisys() {
+    console.table(this.tokens);
     this.parseConst();
     this.parseStruct();
     this.parseVar();
-    this.parseGenerateFuncAndProc()
-    this.parseStart();
-    console.table(this.errors)
+    this.parseGenerateFuncAndProc();
   }
 
-  parseConst () {
-    if (this.match('const')) {
-      this.accept('const')
-      if (this.match ('{')) {
-        this.accept ('{')
-        this.parseTypeConst()
+  parseConst() {
+    if (this.consume("const")) {
+      if (this.consume("{")) {
+        this.parseTypeConst();
       } else {
-        let tokenSync = []
-        let lexemeSync = ['}', 'typedef', 'var', 'start', 'function', 'procedure']
-        
-        this.errorHandler('{', this.currentLexeme, this.currentLineNumber);
-        this.sync(tokenSync, lexemeSync)
-
-        if (this.tokenPointer < this.tokens.length) {
-          switch (this.currentLexeme) {
-            case 'start':
-              this.parseStart()
-              break;
-            case 'typedef':
-              this.parseStruct()
-              break;
-            case 'var':
-              this.parseVar()
-              break;
-            case 'function':
-              this.parseGenerateFuncAndProc()
-              break;
-            case 'procedure':
-              this.parseGenerateFuncAndProc()
-              break;
-            case '}':
-              this.parseStruct()
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    } else {
-      return; // <>
-    }
-  }
-
-  parseTypeConst () {
-    if (this.matchType()) {
-      this.acceptType()
-      this.parseConstExpression()
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['int', 'real', 'string', 'boolean','}', 'typedef', 'var', 'start', 'function', 'procedure']
-      
-      this.errorHandler('Attribute Type', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
+        this.handleError("{", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("const"));
         switch (this.currentLexeme) {
-          case 'start':
-            this.parseStart()
-            break;
-          case 'typedef':
-            this.parseStruct()
-            break;
-          case 'var':
-            this.parseVar()
-            break;
-          case 'function':
-            this.parseGenerateFuncAndProc()
-            break;
-          case 'procedure':
-            this.parseGenerateFuncAndProc()
-            break;
-          case '}':
-            this.parseStruct()
-            break;
-          case 'real':
-            this.parseTypeConst()
-            break;
-          case 'string':
-            this.parseTypeConst()
-            break;
-          case 'int':
-            this.parseTypeConst()
-            break;
-          case 'boolean':
-            this.parseTypeConst()
-            break;
-          default:
-            break;
+          case "typedef": this.parseStruct(); break;
+          case "var": this.parseVar(); break;
+          case "function": this.parseGenerateFuncAndProc(); break;
+          case "procedure": this.parseGenerateFuncAndProc(); break;
+          case "start": this.parseGenerateFuncAndProc(); break;
+          case this.eof(): return;
         }
       }
     }
   }
 
-  parseConstExpression () {
-    if(this.match('Identifier', true)) {
-      this.accept('Identifier', true)
-      if (this.matchValue()) {
-        this.acceptValue()
-        this.parseConstContinuation()
+  parseTypeConst() {
+    if (this.consumeType(this.currentLexeme)) {
+      this.parseConstExpression();
+    } else {
+      this.handleError("Const Type", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("const"));
+      switch (this.currentLexeme) {
+        case "typedef": this.parseStruct(); break;
+        case "var": this.parseVar(); break;
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case this.eof(): return;
+      }
+    }
+  }
+
+  parseConstExpression() {
+    if (this.consume("Identifier", true)) {
+      if (this.consumeValue(this.currentLexeme)) {
+        this.parseConstContinuation();
       } else {
-        let tokenSync = ["Identifier", "String", "Number"]
-        let lexemeSync = [';','}', 'typedef', 'var', 'start', 'function', 'procedure']
-        
-        this.errorHandler('Value to be assigned to constant', this.currentLexeme, this.currentLineNumber);
-        this.sync(tokenSync, lexemeSync)
-  
-        if (this.tokenPointer < this.tokens.length) {
-          if (this.currentLexeme == 'start') {
-            this.parseStart()
-          } else if (this.currentLexeme == 'typedef') {
-            this.parseStruct()
-          } else if (this.currentLexeme == 'var') {
-            this.parseVar()
-          } else if (this.currentLexeme == 'function' || this.currentLexeme == 'procedure') {
-            this.parseGenerateFuncAndProc()
-          }
-        }
-      }
-    }
-  }
-
-  parseConstContinuation () {
-    if (this.match(',')) {
-      this.accept(',')
-      this.parseConstExpression()
-    } else if (this.match(';')) {
-      this.accept(';')
-      this.parseConstTermination()
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['int', 'real', 'string', 'boolean','}', 'typedef', 'var', 'start', 'function', 'procedure']
-      
-      this.errorHandler(', or ;', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
+        this.handleError("Const value to be assigned", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("const"));
         switch (this.currentLexeme) {
-          case 'start':
-            this.parseStart()
-            break;
-          case 'typedef':
-            this.parseStruct()
-            break;
-          case 'var':
-            this.parseVar()
-            break;
-          case 'function':
-            this.parseGenerateFuncAndProc()
-            break;
-          case 'procedure':
-            this.parseGenerateFuncAndProc()
-            break;
-          case '}':
-            this.parseStruct()
-            break;
-          case 'real':
-            this.parseTypeConst()
-            break;
-          case 'string':
-            this.parseTypeConst()
-            break;
-          case 'int':
-            this.parseTypeConst()
-            break;
-          case 'boolean':
-            this.parseTypeConst()
-            break;
-          default:
-            break;
+          case "typedef": this.parseStruct(); break;
+          case "var": this.parseVar(); break;
+          case "function": this.parseGenerateFuncAndProc(); break;
+          case "procedure": this.parseGenerateFuncAndProc(); break;
+          case "start": this.parseGenerateFuncAndProc(); break;
+          case this.eof(): return;
         }
+      }
+    } else {
+      this.handleError("Const Identifier", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("const"));
+      switch (this.currentLexeme) {
+        case "typedef": this.parseStruct(); break;
+        case "var": this.parseVar(); break;
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case this.eof(): return;
       }
     }
   }
 
-  parseConstTermination () {
-    if (this.match('}')) {
-      this.accept('}')
-    } else if (this.matchType()){
+  parseConstContinuation() {
+    if (this.consume(",")) {
+      this.parseConstExpression();
+    } else if (this.consume(";")) {
+      this.parseConstTermination();
+    }
+  }
+
+  parseConstTermination() {
+    if (this.consume("}")) {
+      return;
+    } else if (this.checkType()) {
       this.parseTypeConst();
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['typedef', 'var', 'start', 'function', 'procedure']
-      
-      this.errorHandler('}', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
-        if (this.currentLexeme == 'start') {
-          this.parseStart()
-        } else if (this.currentLexeme == 'typedef') {
-          this.parseStruct()
-        } else if (this.currentLexeme == 'var') {
-          this.parseVar()
-        } else if (this.currentLexeme == 'function' || this.currentLexeme == 'procedure') {
-          this.parseGenerateFuncAndProc()
-        }
-      }
     }
   }
 
-  parseStruct () {
-    if (this.match('typedef')) {
-      this.accept('typedef')
-      if (this.match('struct')) {
-        this.accept('struct')
-        if (this.match('Identifier', true)) {
-          this.accept('Identifier', true)
+  parseStruct() {
+    if (this.consume("typedef")) {
+      if (this.consume("struct")) {
+        if (this.consume("Identifier", true)) {
           this.parseStructExtends();
-        } else {
-          let tokenSync = []
-          let lexemeSync = ['}', '{', 'var', 'start', 'function', 'procedure']
-          
-          this.errorHandler('Identifier', this.currentLexeme, this.currentLineNumber);
-          this.sync(tokenSync, lexemeSync)
-    
-          if (this.tokenPointer < this.tokens.length) {
-            switch (this.currentLexeme) {
-              case 'start':
-                this.parseStart()
-                break;
-              case 'var':
-                this.parseVar()
-                break;
-              case 'function':
-                this.parseGenerateFuncAndProc()
-                break;
-              case 'procedure':
-                this.parseGenerateFuncAndProc()
-                break;
-              case '{':
-                this.parseStruct()
-                break;
-              case '}':
-                this.parseVar()
-                break;
-              default:
-                break;
-            }
-          }
-        }
-      } else {
-        let tokenSync = []
-        let lexemeSync = ['{', 'var', 'start', 'function', 'procedure']
-        
-        this.errorHandler('struct', this.currentLexeme, this.currentLineNumber);
-        this.sync(tokenSync, lexemeSync)
-  
-        if (this.tokenPointer < this.tokens.length) {
-          switch (this.currentLexeme) {
-            case 'start':
-              this.parseStart()
-              break;
-            case 'var':
-              this.parseVar()
-              break;
-            case 'function':
-              this.parseGenerateFuncAndProc()
-              break;
-            case 'procedure':
-              this.parseGenerateFuncAndProc()
-              break;
-            case '{':
-              this.parseStruct()
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    } else {
-      return; // <>
-    }
-  }
-
-  parseStructExtends () {
-    if (this.match('extends')) {
-      this.accept('extends')
-      if (this.match('{')) {
-        this.accept('{')
-        this.parseTypeStruct()
-      }
-    } else if (this.match('{')) {
-      this.accept('{')
-      this.parseTypeStruct()
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['}', 'var', 'start', 'function', 'procedure']
-      
-      this.errorHandler('{', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
-        switch (this.currentLexeme) {
-          case 'start':
-            this.parseStart()
-            break;
-          case 'var':
-            this.parseVar()
-            break;
-          case 'function':
-            this.parseGenerateFuncAndProc()
-            break;
-          case 'procedure':
-            this.parseGenerateFuncAndProc()
-            break;
-          case '}':
-            this.parseVar()
-            break;
-          default:
-            break;
         }
       }
     }
   }
 
-  parseTypeStruct () {
-    if (this.matchType()) {
-      this.acceptType()
-      this.parseStructExpression()
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['int', 'real', 'string', 'boolean','}', 'var', 'start', 'function', 'procedure']
-      
-      this.errorHandler('Attribute Type', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
-        switch (this.currentLexeme) {
-          case 'start':
-            this.parseStart()
-            break;
-          case 'var':
-            this.parseVar()
-            break;
-          case 'function':
-            this.parseGenerateFuncAndProc()
-            break;
-          case 'procedure':
-            this.parseGenerateFuncAndProc()
-            break;
-          case '}':
-            this.parseStruct()
-            break;
-          case 'real':
-            this.parseTypeStruct()
-            break;
-          case 'string':
-            this.parseTypeStruct()
-            break;
-          case 'int':
-            this.parseTypeStruct()
-            break;
-          case 'boolean':
-            this.parseTypeStruct()
-            break;
-          default:
-            break;
-        }
+  parseStructExtends() {
+    if (this.consume("extends")) {
+      if (this.consume("{")) {
+        this.parseTypeStruct();
       }
-    }
-  }
-
-  parseStructExpression () {
-    if(this.match('Identifier', true)) {
-      this.accept('Identifier', true)
-      this.parseStructContinuation()
-    } 
-  }
-
-  parseStructContinuation () {    
-    if (this.match(',')) {
-      this.accept(',')
-      this.parseStructExpression()
-    } else if (this.match(';')) {
-      this.accept(';')
-      this.parseStructTermination()
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['int', 'real', 'string', 'boolean','}', 'var', 'start', 'function', 'procedure']
-      
-      this.errorHandler(', or ;', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
-        switch (this.currentLexeme) {
-          case 'start':
-            this.parseStart()
-            break;
-          case 'var':
-            this.parseVar()
-            break;
-          case 'function':
-            this.parseGenerateFuncAndProc()
-            break;
-          case 'procedure':
-            this.parseGenerateFuncAndProc()
-            break;
-          case '}':
-            this.parseStruct()
-            break;
-          case 'real':
-            this.parseTypeStruct()
-            break;
-          case 'string':
-            this.parseTypeStruct()
-            break;
-          case 'int':
-            this.parseTypeStruct()
-            break;
-          case 'boolean':
-            this.parseTypeStruct()
-            break;
-          default:
-            break;
-        }
-      }
-    }
-  }
-
-  parseStructTermination () {
-    if (this.match('}')) {
-      this.accept('}')
-      return;
-    } else if (this.matchType) {
+    } else if (this.consume("{")) {
       this.parseTypeStruct();
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['var', 'start', 'function', 'procedure']
-      
-      this.errorHandler('}', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
-        if (this.currentLexeme == 'start') {
-          this.parseStart()
-        } else if (this.currentLexeme == 'var') {
-          this.parseVar()
-        } else if (this.currentLexeme == 'function' || this.currentLexeme == 'procedure') {
-          this.parseGenerateFuncAndProc()
-        }
-      }
     }
   }
 
-  // Relative to Var
-  parseVar () {
-    if (this.match('var')) {
-      this.accept('var')
-      if (this.match ('{')) {
-        this.accept ('{')
-        this.parseTypeVar()
-      } else {
-        let tokenSync = []
-        let lexemeSync = ['}', 'start', 'function', 'procedure']
-        
-        this.errorHandler('{', this.currentLexeme, this.currentLineNumber);
-        this.sync(tokenSync, lexemeSync)
-
-        if (this.tokenPointer < this.tokens.length) {
-          switch (this.currentLexeme) {
-            case 'start':
-              this.parseStart()
-              break;
-            case 'function':
-              this.parseGenerateFuncAndProc()
-              break;
-            case 'procedure':
-              this.parseGenerateFuncAndProc()
-              break;
-            case '}':
-              this.parseGenerateFuncAndProc()
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    } else {
-      return; // <>
+  parseTypeStruct() {
+    if (this.consumeType()) {
+      this.parseStructExpression();
     }
   }
 
-  // Relative to TipoVar
-  parseTypeVar () {
-    if (this.matchType()) {
-      this.acceptType()
-      this.parseVarExpression()
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['int', 'real', 'string', 'boolean', 'start', 'function', 'procedure']
-      
-      this.errorHandler('Attribute Type', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
-        switch (this.currentLexeme) {
-          case 'start':
-            this.parseStart()
-            break;
-          case 'var':
-            this.parseVar()
-            break;
-          case 'function':
-            this.parseGenerateFuncAndProc()
-            break;
-          case 'procedure':
-            this.parseGenerateFuncAndProc()
-            break;
-          case '}':
-            this.parseGenerateFuncAndProc()
-            break;
-          case 'real':
-            this.parseTypeVar()
-            break;
-          case 'string':
-            this.parseTypeVar()
-            break;
-          case 'int':
-            this.parseTypeVar()
-            break;
-          case 'boolean':
-            this.parseTypeVar()
-            break;
-          default:
-            break;
-        }
-      }
+  parseStructExpression() {
+    if (this.consume("Identifier", true)) {
+      this.parseStructContinuation();
     }
   }
 
-  // Relative to IdVar
-  parseVarExpression () {
-    if(this.match('Identifier', true)) {
-      this.accept('Identifier', true)
-      this.parseVarContinuation()
-    } 
-  }
-
-  // Relative to Var2
-  parseVarContinuation () {
-    if (this.match(',')) {
-      this.accept(',')
-      this.parseVarExpression()
-    } else if (this.match(';')) {
-      this.accept(';')
-      this.parseVarTermination()
-    } else if (this.match('=')) { 
-      this.accept('=')
-      if (this.matchValue()) {
-        this.acceptValue()
-        this.parseVarAttribuition();
-      } else {
-        let tokenSync = []
-        let lexemeSync = ['int', 'real', 'boolean', 'string', ';', '}', 'start', 'function', 'procedure']
-        
-        this.errorHandler('Value to be assigned', this.currentLexeme, this.currentLineNumber);
-        this.sync(tokenSync, lexemeSync)
-
-        if (this.tokenPointer < this.tokens.length) {
-          switch (this.currentLexeme) {
-            case 'start':
-              this.parseStart()
-              break;
-            case 'function':
-              this.parseGenerateFuncAndProc()
-              break;
-            case 'procedure':
-              this.parseGenerateFuncAndProc()
-              break;
-            case '}':
-              this.parseGenerateFuncAndProc()
-              break;
-            case ';':
-              this.parseVarContinuation()
-              break;
-            case 'int':
-              this.parseTypeVar()
-              break;
-            case 'real':
-              this.parseTypeVar()
-              break;
-            case 'boolean':
-              this.parseTypeVar()
-              break;
-            case 'string':
-              this.parseTypeVar()
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    } else if (this.match('[')) {
-      this.parseVector()
+  parseStructContinuation() {
+    if (this.consume(",")) {
+      this.parseStructExpression();
+    } else if (this.consume(";")) {
+      this.parseStructTermination();
     }
   }
 
-  // Relative to Var4
-  parseVarAttribuition () {
-    if (this.match(',')) {
-      this.accept(',')
-      this.parseVarExpression();
-    } else if (this.match(';')) {
-      this.accept(';')
-      this.parseVarTermination();
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['int', 'real', 'string', 'boolean', 'start', 'function', 'procedure']
-      
-      this.errorHandler(', or ;', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
-        switch (this.currentLexeme) {
-          case 'start':
-            this.parseStart()
-            break;
-          case 'function':
-            this.parseGenerateFuncAndProc()
-            break;
-          case 'procedure':
-            this.parseGenerateFuncAndProc()
-            break;
-          case '}':
-            this.parseGenerateFuncAndProc()
-            break;
-          case 'real':
-            this.parseTypeVar()
-            break;
-          case 'string':
-            this.parseTypeVar()
-            break;
-          case 'int':
-            this.parseTypeVar()
-            break;
-          case 'boolean':
-            this.parseTypeVar()
-            break;
-          default:
-            break;
-        }
-      }
-    }
-  }
-
-  // Relative to Var3
-  parseVarTermination () {
-    if (this.match('}')) {
-      this.accept('}')
+  parseStructTermination() {
+    if (this.consume("}")) {
       return;
-    } else if (this.matchType()){
+    } else if (this.checkType()) {
+      this.parseTypeStruct();
+    }
+  }
+
+  parseVar() {
+    if (this.consume("var")) {
+      if (this.consume("{")) {
+        this.parseTypeVar();
+      }
+    }
+  }
+
+  parseTypeVar() {
+    if (this.consumeType()) {
+      this.parseVarExpression();
+    }
+  }
+
+  parseVarExpression() {
+    if (this.consume("Identifier", true)) {
+      this.parseVarContinuation();
+    }
+  }
+
+  parseVarContinuation() {
+    if (this.consume(",")) {
+      this.parseVarExpression();
+    } else if (this.consume(";")) {
+      this.parseVarTermination();
+    } else if (this.check("[")) {
+      this.parseVector();
+    } else if (this.consume("=")) {
+      if (this.consumeValue()) {
+        this.parseVarAttribuition();
+      }
+    }
+  }
+
+  parseVarAttribuition() {
+    if (this.consume(",")) {
+      this.parseVarExpression();
+    } else if (this.consume(";")) {
+      this.parseVarTermination();
+    }
+  }
+
+  parseVarTermination() {
+    if (this.consume("}")) {
+      return;
+    } else if (this.checkType()) {
       this.parseTypeVar();
-    } else {
-      let tokenSync = []
-      let lexemeSync = ['start', 'function', 'procedure']
-      
-      this.errorHandler('}', this.currentLexeme, this.currentLineNumber);
-      this.sync(tokenSync, lexemeSync)
-
-      if (this.tokenPointer < this.tokens.length) {
-        if (this.currentLexeme == 'start') {
-          this.parseStart()
-        } else if (this.currentLexeme == 'function' || this.currentLexeme == 'procedure') {
-          this.parseGenerateFuncAndProc()
-        }
-      }
     }
   }
 
-  // Relative to Vetor
-  parseVector () {
-    if (this.match('[')) {
-      this.accept('[')
-      if(this.matchVectorIndex()) {
-        this.acceptVectorIndex()
-        if (this.match(']')) {
-          this.accept(']')
+  parseVector() {
+    if (this.consume("[")) {
+      if (this.consumeVectorIndex()) {
+        if (this.consume("]")) {
           this.parseMatrix();
-        } else {
-          let tokenSync = []
-          let lexemeSync = ['int', 'real', 'boolean', 'string', ';', '}', 'start', 'function', 'procedure']
-          
-          this.errorHandler(']', this.currentLexeme, this.currentLineNumber);
-          this.sync(tokenSync, lexemeSync)
-
-          if (this.tokenPointer < this.tokens.length) {
-            switch (this.currentLexeme) {
-              case 'start':
-                this.parseStart()
-                break;
-              case 'function':
-                this.parseGenerateFuncAndProc()
-                break;
-              case 'procedure':
-                this.parseGenerateFuncAndProc()
-                break;
-              case '}':
-                this.parseGenerateFuncAndProc()
-                break;
-              case ';':
-                this.parseVarContinuation()
-                break;
-              case 'int':
-                this.parseTypeVar()
-                break;
-              case 'real':
-                this.parseTypeVar()
-                break;
-              case 'boolean':
-                this.parseTypeVar()
-                break;
-              case 'string':
-                this.parseTypeVar()
-                break;
-              default:
-                break;
-            }
-          }
-        }
-      } else {
-        let tokenSync = []
-        let lexemeSync = ['int', 'real', 'boolean', 'string', ';', '}', 'start', 'function', 'procedure']
-        
-        this.errorHandler('Value to be array index', this.currentLexeme, this.currentLineNumber);
-        this.sync(tokenSync, lexemeSync)
-
-        if (this.tokenPointer < this.tokens.length) {
-          switch (this.currentLexeme) {
-            case 'start':
-              this.parseStart()
-              break;
-            case 'function':
-              this.parseGenerateFuncAndProc()
-              break;
-            case 'procedure':
-              this.parseGenerateFuncAndProc()
-              break;
-            case '}':
-              this.parseGenerateFuncAndProc()
-              break;
-            case ';':
-              this.parseVarContinuation()
-              break;
-            case 'int':
-              this.parseTypeVar()
-              break;
-            case 'real':
-              this.parseTypeVar()
-              break;
-            case 'boolean':
-              this.parseTypeVar()
-              break;
-            case 'string':
-              this.parseTypeVar()
-              break;
-            default:
-              break;
-          }
         }
       }
     }
   }
 
-  // Relative to Matriz
-  parseMatrix () {
-    if (this.match('[')) {
-      this.accept('[')
-      if(this.matchVectorIndex()) {
-        this.acceptVectorIndex()
-        if (this.match(']')) {
-          this.accept(']')
+  parseMatrix() {
+    if (this.consume("[")) {
+      if (this.consumeVectorIndex()) {
+        if (this.consume("]")) {
           this.parseVarAttribuition();
-        } else {
-          let tokenSync = []
-          let lexemeSync = ['int', 'real', 'boolean', 'string', ';', '}', 'start', 'function', 'procedure']
-          
-          this.errorHandler(']', this.currentLexeme, this.currentLineNumber);
-          this.sync(tokenSync, lexemeSync)
-
-          if (this.tokenPointer < this.tokens.length) {
-            switch (this.currentLexeme) {
-              case 'start':
-                this.parseStart()
-                break;
-              case 'function':
-                this.parseGenerateFuncAndProc()
-                break;
-              case 'procedure':
-                this.parseGenerateFuncAndProc()
-                break;
-              case '}':
-                this.parseGenerateFuncAndProc()
-                break;
-              case ';':
-                this.parseVarContinuation()
-                break;
-              case 'int':
-                this.parseTypeVar()
-                break;
-              case 'real':
-                this.parseTypeVar()
-                break;
-              case 'boolean':
-                this.parseTypeVar()
-                break;
-              case 'string':
-                this.parseTypeVar()
-                break;
-              default:
-                break;
-            }
-          }
-        }
-      } else {
-        let tokenSync = []
-        let lexemeSync = ['int', 'real', 'boolean', 'string', ';', '}', 'start', 'function', 'procedure']
-        
-        this.errorHandler('Value to be array index', this.currentLexeme, this.currentLineNumber);
-        this.sync(tokenSync, lexemeSync)
-
-        if (this.tokenPointer < this.tokens.length) {
-          switch (this.currentLexeme) {
-            case 'start':
-              this.parseStart()
-              break;
-            case 'function':
-              this.parseGenerateFuncAndProc()
-              break;
-            case 'procedure':
-              this.parseGenerateFuncAndProc()
-              break;
-            case '}':
-              this.parseGenerateFuncAndProc()
-              break;
-            case ';':
-              this.parseVarContinuation()
-              break;
-            case 'int':
-              this.parseTypeVar()
-              break;
-            case 'real':
-              this.parseTypeVar()
-              break;
-            case 'boolean':
-              this.parseTypeVar()
-              break;
-            case 'string':
-              this.parseTypeVar()
-              break;
-            default:
-              break;
-          }
         }
       }
     } else {
@@ -1019,558 +357,537 @@ class SyntaticalAnalyzer {
   }
 
   // Relative to ListaParametros
-  parseParametersList () {
-    if (this.matchFirstSet(this.currentLexeme, 'scope') || this.match('Number', true) || this.match('String', true)) {
+  parseParametersList() {
+    if (
+      this.matchFirstSet(this.currentLexeme, "scope") ||
+      this.consume("Number", true) ||
+      this.consume("String", true)
+    ) {
       this.parseParametersListEnd();
-      this.parseParametersListContinuation()
+      this.parseParametersListContinuation();
     }
   }
 
   // Relative to ContListaParametros
-  parseParametersListContinuation () {
-    if (this.match(',')) {
-      this.accept(',')
-      this.parseParametersList()
+  parseParametersListContinuation() {
+    if (this.consume(",")) {
+      this.parseParametersList();
     }
   }
 
   // Relative to ListaParametros2
-  parseParametersListEnd () {
-    if (this.matchFirstSet(this.currentLexeme, 'scope')) {
-      this.accept(this.currentLexeme)
-    } else if (this.match('Number', true) || this.match('String', true)) {
-      this.accept(this.currentToken, true)
+  parseParametersListEnd() {
+    if (this.matchFirstSet(this.currentLexeme, "scope")) {
+    } else if (this.consume("Number", true) || this.consume("String", true)) {
     }
   }
 
-
-  parseIdentifier () {
-    if (this.matchFirstSet(this.currentLexeme, 'scope')) {
-      this.parseScope()
-      if (this.match('Identifier', true)) {
-        this.accept('Identifier', true)
-        this.parseIdentifierAccess()
+  parseIdentifier() {
+    if (this.matchFirstSet(this.currentLexeme, "scope")) {
+      this.parseScope();
+      if (this.consume("Identifier", true)) {
+        this.parseIdentifierAccess();
       }
-    } else if(this.match('Identifier', true)) {
-      this.accept('Identifier', true)
-      this.parseIdentifierAppendix()
+    } else if (this.consume("Identifier", true)) {
+      this.parseIdentifierAppendix();
     }
   }
 
-  parseIdentifierAppendix () {
-    if (this.matchFirstSet(this.currentLexeme, 'identifier_access')) {
-      this.parseIdentifierAccess()
-    } else if (this.accept('(')) {
-      this.parseParametersList()
-      if (this.accept(')')) {
-        return
+  parseIdentifierAppendix() {
+    if (this.matchFirstSet(this.currentLexeme, "identifier_access")) {
+      this.parseIdentifierAccess();
+    } else if ("a") {
+      this.parseParametersList();
+      if ("a") {
+        return;
       }
     }
   }
 
   // Relative to Identificador2
-  parseIdentifierAccess () {
-    if (this.match('.')) {
-      this.accept('.')
-      if (this.match('Identifier', true)) {
-        this.accept('Identifier', true)
-        this.parseVectorDeclaration()
+  parseIdentifierAccess() {
+    if (this.consume(".")) {
+      if (this.consume("Identifier", true)) {
+        this.parseVectorDeclaration();
       }
-    } else if (this.match('[')) {
-      this.parseVectorDeclaration()
-    } else { // Se for vazio
-      this.nextToken()
+    } else if (this.consume("[")) {
+      this.parseVectorDeclaration();
+    } else {
+      // Se for vazio
+      this.nextToken();
     }
   }
 
-  parseVectorDeclaration () {
-    if (this.match('[')) {
-      this.accept('[')
-      if (this.acceptVectorIndex()) {
-        this.matchVectorIndex()
-        if (this.match(']')) {
-          this.accept(']')
-          this.parseVectorNewDimension()
-          this.parseVectorAccess()
+  parseVectorDeclaration() {
+    if (this.consume("[")) {
+      if (this.consumeVectorIndex()) {
+        if (this.consume("]")) {
+          this.parseVectorNewDimension();
+          this.parseVectorAccess();
         }
       }
-    } else if (this.match('.')) {
-      this.parseVectorAccess()
+    } else if (this.consume(".")) {
+      this.parseVectorAccess();
     }
   }
 
   // Relative to Vetor2
-  parseVectorNewDimension () {
-    if (this.match('[')) {
-      this.accept('[')
-      if (this.matchVectorIndex()) {
-        this.acceptVectorIndex()
-        if (this.match(']')) {
-          this.accept(']')
-          this.parseVectorNewDimension()
-          this.parseVectorAccess()
+  parseVectorNewDimension() {
+    if (this.consume("[")) {
+      if (this.consumeVectorIndex()) {
+        if (this.consume("]")) {
+          this.parseVectorNewDimension();
+          this.parseVectorAccess();
         }
       }
     }
   }
 
-
   // Relative to Identificador 4
-  parseVectorAccess () {
-    if (this.match('.')) {
-      this.accept('.')
-      if (this.match('Identifier', true)) {
-        this.accept('Identifier', true)
-        this.parseVectorDeclaration()
+  parseVectorAccess() {
+    if (this.consume(".")) {
+      if (this.consume("Identifier", true)) {
+        this.parseVectorDeclaration();
       }
     }
   }
 
-  parseScope () {
-    if (this.matchFirstSet(this.currentLexeme, 'scope')) {
-      if (this.match(this.currentLexeme)) {
-        this.accept(this.currentLexeme)
-        if (this.match('.')) {
-          this.accept('.')
+  parseScope() {
+    if (this.matchFirstSet(this.currentLexeme, "scope")) {
+      if (this.consume(this.currentLexeme)) {
+        if (this.consume(".")) {
           return;
         }
       }
     }
   }
 
-  parseIdentifierWithoutFunction () {
-    if (this.matchFirstSet(this.currentLexeme, 'scope')) {
-      this.accept(this.currentLexeme);
-      if (this.match('Identifier', true)) {
-        this.accept('Identifier', true)
-        this.parseIdentifierAccess()
+  parseIdentifierWithoutFunction() {
+    if (this.matchFirstSet(this.currentLexeme, "scope")) {
+      this.consume(this.currentLexeme)
+      if (this.consume("Identifier", true)) {
+        this.parseIdentifierAccess();
       }
-    } else if (this.match('Identifier', true)) {
-      this.parseIdentifierAccess()
+    } else if (this.check("Identifier", true)) {
+      this.parseIdentifierAccess();
     }
   }
 
-  parseArithmeticExpression () {
-    if (this.match('(') || this.match('Number', true)) {
-      this.parseT()
-      this.parseE2()
-    } else if (this.matchFirstSet(this.currentLexeme, 'scope') || this.match('Identifier', true)) {
-      this.parseArithmeticIdentifier()
-    } else if (this.match('++')) {
-      this.accept('++')
-      this.parseIdentifierWithoutFunction()
-      this.parseT2()
-      this.parseE2()
-    } else if (this.match('--')) {
-      this.accept('--')
-      this.parseIdentifierWithoutFunction()
-      this.parseT2()
-      this.parseE2()
+  parseArithmeticExpression() {
+    if (this.check("(") || this.check("Number", true)) {
+      this.parseT();
+      this.parseE2();
+    } else if (
+      this.matchFirstSet(this.currentLexeme, "scope") ||
+      this.check("Identifier", true)
+    ) {
+      this.parseArithmeticIdentifier();
+    } else if (this.consume("++")) {
+      this.parseIdentifierWithoutFunction();
+      this.parseT2();
+      this.parseE2();
+    } else if (this.consume("--")) {
+      this.parseIdentifierWithoutFunction();
+      this.parseT2();
+      this.parseE2();
     }
   }
 
-  parseArithmeticExpression2 () {
-    if (this.match('++')) {
-      this.accept('++')
-      this.parseE2()
-    } else if (this.match('--')) {
-      this.accept('--')
-      this.parseE2()
-    } else if (this.matchFirstSet(this.currentLexeme,'t2')) {
-      this.parseE2()
+  parseArithmeticExpression2() {
+    if (this.consume("++")) {
+      this.parseE2();
+    } else if (this.consume("--")) {
+      this.parseE2();
+    } else if (this.matchFirstSet(this.currentLexeme, "t2")) {
+      this.parseE2();
     }
   }
 
   parseE2() {
-    if (this.match('+')) {
-      this.accept('+')
-      this.parseArithmeticExpression()
-    } else if (this.match('-')) {
-      this.accept('-')
-      this.parseArithmeticExpression()
+    if (this.consume("+")) {
+      this.parseArithmeticExpression();
+    } else if (this.consume("-")) {
+      this.parseArithmeticExpression();
     }
   }
 
-  parseT () {
-    this.parseF()
-    this.parseT2()
+  parseT() {
+    this.parseF();
+    this.parseT2();
   }
 
-  parseT2 () {
-    if (this.match('*')) {
-      this.accept('*')
-      this.parseArithmeticExpression()
-    } else if (this.match('/')) {
-      this.accept('/')
-      this.parseArithmeticExpression()
+  parseT2() {
+    if (this.consume("*")) {
+      this.parseArithmeticExpression();
+    } else if (this.consume("/")) {
+      this.parseArithmeticExpression();
     }
   }
 
-  parseF () {
-    if (this.match('(')) {
-      this.accept('(')
-      this.parseArithmeticExpression()
-      if (this.match(')')) {
-        this.accept(')')
-        return
+  parseF() {
+    if (this.consume("(")) {
+      this.parseArithmeticExpression();
+      if (this.consume(")")) {
+        return;
       }
-    } else if (this.match('Number', true)) {
-      this.accept('Number', true)
-      return
+    } else if (this.consume("Number", true)) {
+      return;
     }
   }
 
-  parseArithmeticIdentifier () {
-    if (this.matchFirstSet(this.currentLexeme, 'scope')) {
-      this.accept(this.currentLexeme)
-      if (this.match('Identifier', true)) {
-        this.accept('Identifier', true)
-        this.parseIdentifierAccess()
-        this.parseArithmeticExpression2()
+  parseArithmeticIdentifier() {
+    if (this.matchFirstSet(this.currentLexeme, "scope")) {
+      if (this.consume("Identifier", true)) {
+        this.parseIdentifierAccess();
+        this.parseArithmeticExpression2();
       }
-    } else if (this.match('Identifier', true)) {
-      this.accept('Identifier', true)
-      this.parseArithmeticIdentifier3()
+    } else if (this.consume("Identifier", true)) {
+      this.parseArithmeticIdentifier3();
     }
-
   }
 
-  parseArithmeticIdentifier3 () {
-    if (this.matchFirstSet(this.currentLexeme, 'identifier_access')) {
-      this.parseIdentifierAccess()
-      this.parseArithmeticExpression2()
-    } else if (this.match('(')) {
-      this.accept('(')
-      this.parseParametersList()
-      if (this.match(')')) {
-        this.accept(')')
-        this.parseT2()
-        this.parseE2()
+  parseArithmeticIdentifier3() {
+    if (this.matchFirstSet(this.currentLexeme, "identifier_access")) {
+      this.parseIdentifierAccess();
+      this.parseArithmeticExpression2();
+    } else if (this.consume("(")) {
+      this.parseParametersList();
+      if (this.consume(")")) {
+        this.parseT2();
+        this.parseE2();
       }
     }
   }
 
-  parseLogicalRelationalExpression () {
-    if (this.match('!') 
-      || this.isBoolean(this.currentLexeme) 
-      || this.match('String', true)
-      || this.matchFirstSet(this.currentLexeme, 'arithmetic_expression') 
-      || this.match('Number', true)
-      || this.match('Identifier', true) ) {
-      this.parseLRExpression()
-    } else if (this.match('(')) {
-      this.accept('(')
-      this.parseLRExpression()
-      if (this.match(')')) {
-        this.accept(')')
-        this.parseLRExpression3()
+  parseLogicalRelationalExpression() {
+    if (
+      this.check("!") ||
+      this.isBoolean(this.currentLexeme) ||
+      this.check("String", true) ||
+      this.matchFirstSet(this.currentLexeme, "arithmetic_expression") ||
+      this.check("Number", true) ||
+      this.check("Identifier", true)
+    ) {
+      this.parseLRExpression();
+    } else if (this.check("(")) {
+      this.parseLRExpression();
+      if (this.check(")")) {
+        this.parseLRExpression3();
       }
     }
   }
 
-  parseLRExpression () {
-    if (this.match('!') || this.isBoolean(this.currentLexeme)) {
-      this.parseLRArgument2()
-      this.parseLRExpression2()
-    } else if (this.match('String', true)
-        || this.matchFirstSet(this.currentLexeme, 'arithmetic_expression') 
-        || this.match('Number', true)
-        || this.match('Identifier', true)) {
-        this.parseLRArgument3()
-        if (this.isRelationalOperator(this.currentLexeme)) {
-          this.accept(this.currentLexeme)
-          this.parseLRArgument()
-          this.parseLRExpression3()
-        }
+  parseLRExpression() {
+    if (this.check("!") || this.isBoolean(this.currentLexeme)) {
+      this.parseLRArgument2();
+      this.parseLRExpression2();
+    } else if (
+      this.check("String", true) ||
+      this.matchFirstSet(this.currentLexeme, "arithmetic_expression") ||
+      this.check("Number", true) ||
+      this.check("Identifier", true)
+    ) {
+      this.parseLRArgument3();
+      if (this.isRelationalOperator(this.currentLexeme)) {
+        this.consume(this.currentLexeme)
+        this.parseLRArgument();
+        this.parseLRExpression3();
+      }
     }
   }
 
-  parseLRExpression2 () {
+  parseLRExpression2() {
     if (this.isRelationalOperator(this.currentLexeme)) {
-      this.accept(this.currentLexeme)
-      this.parseLRArgument()
-      this.parseLRExpression3()
+      this.parseLRArgument();
+      this.parseLRExpression3();
     } else if (this.isLogicalOperator(this.currentLexeme)) {
-      this.parseLRExpression3()
+      this.parseLRExpression3();
     }
   }
 
-  parseLRExpression3 () {
+  parseLRExpression3() {
     if (this.isLogicalOperator(this.currentLexeme)) {
-      this.accept(this.currentLexeme)
-      this.parseLogicalRelationalExpression()
+      this.parseLogicalRelationalExpression();
     }
   }
 
-  parseLRArgument () {
-    if (this.match('!') || this.isBoolean(this.currentLexeme)) {
-      this.parseLRArgument2()
-    } else if (this.match('String', true) 
-      || this.matchFirstSet(this.currentLexeme, 'arithmetic_expression') 
-      || this.match('Number', true)
-      || this.match('Identifier', true)) {
-        this.parseLRArgument3()
+  parseLRArgument() {
+    if (this.check("!") || this.isBoolean(this.currentLexeme)) {
+      this.parseLRArgument2();
+    } else if (
+      this.check("String", true) ||
+      this.matchFirstSet(this.currentLexeme, "arithmetic_expression") ||
+      this.check("Number", true) ||
+      this.check("Identifier", true)
+    ) {
+      this.parseLRArgument3();
     }
   }
 
-  parseLRArgument2 () {
-    if (this.match('!') || this.isBoolean(this.currentLexeme)) {
-      this.accept(this.currentLexeme)
-    } 
+  parseLRArgument2() {
+    if (this.check("!") || this.isBoolean(this.currentLexeme)) {
+      this.consume(this.currentLexeme);
+    }
   }
 
-  parseLRArgument2_1 () {
-    if (this.match('Identifier', true)) {
-      this.accept(this.currentLexeme, true)
+  parseLRArgument2_1() {
+    if (this.consume("Identifier", true)) {
+      return;
     } else if (this.isBoolean(this.currentLexeme)) {
-      this.accept(this.currentLexeme)
+      this.consume(this.currentLexeme)
     }
   }
 
-  parseLRArgument3 () {
-    if (this.match('String', true)) {
-      this.accept(this.currentLexeme, true)
-    } else if (this.matchFirstSet(this.currentLexeme, 'arithmetic_expression') 
-        || this.match('Number', true)
-        || this.match('Identifier', true)) {
-      this.parseArithmeticExpression()
+  parseLRArgument3() {
+    if (this.consume("String", true)) {
+      return;
+    } else if (
+      this.matchFirstSet(this.currentLexeme, "arithmetic_expression") ||
+      this.check("Number", true) ||
+      this.check("Identifier", true)
+    ) {
+      this.parseArithmeticExpression();
     }
   }
 
-  parsePrint () {
-    if (this.match('print')) {
-      this.accept('print')
-      if (this.match('(')) {
-        this.accept('(')
-        this.parsePrintContent()
+  parsePrint() {
+    if (this.consume("print")) {
+      if (this.consume("(")) {
+        this.parsePrintContent();
       } else {
-          let tokenSync = ['Identifier']
-          let lexemeSync = ['}', 'start'].concat(this.firstSet['commands'])
-          
-          this.errorHandler('(', this.currentLexeme, this.currentLineNumber);
-          this.sync(tokenSync, lexemeSync)
+        let tokenSync = ["Identifier"];
+        let lexemeSync = ["}", "start"].concat(this.firstSet["commands"]);
 
-          if (this.tokenPointer < this.tokens.length) {
-            if (this.matchFirstSet(this.currentLexeme, 'commands')) {
-              this.parseCommands()
-            } else if (this.currentLexeme == 'start') {
-              this.parseStart()
-            }
-          }
-      }
-    }
-  }
-
-  parsePrintContent () {
-    if (this.match('String', true) || this.match('Number') || this.match('Identifier', true)) {
-      this.accept(this.currentToken, true);
-      this.parsePrintContinuation()
-    } else if (this.matchFirstSet(this.currentLexeme, 'scope')) {
-      this.accept(this.currentLexeme);
-      this.parsePrintContinuation()
-    } else {
-        let tokenSync = ['Identifier']
-        let lexemeSync = ['}', 'start'].concat(this.firstSet['commands'])
-        
-        this.errorHandler('Identifier, String, Number or Function', this.currentLexeme, this.currentLineNumber);
-        this.sync(tokenSync, lexemeSync)
+        this.errorHandler("(", this.currentLexeme, this.currentLineNumber);
+        this.sync(tokenSync, lexemeSync);
 
         if (this.tokenPointer < this.tokens.length) {
-          if (this.matchFirstSet(this.currentLexeme, 'commands')) {
-            this.parseCommands()
-          } else if (this.currentLexeme == 'start') {
-            this.parseStart()
+          if (this.matchFirstSet(this.currentLexeme, "commands")) {
+            this.parseCommands();
+          } else if (this.currentLexeme == "start") {
+            this.parseStart();
           }
         }
+      }
     }
   }
 
-  parsePrintContinuation () {
-    if (this.match(',')) {
-      this.accept(',')
-      this.parsePrintContent()
-    } else if(this.match(')')) {
+  parsePrintContent() {
+    if (
+      this.check("String", true) ||
+      this.check("Number") ||
+      this.check("Identifier", true)
+    ) {
+      this.consume(this.currentLexeme)
+      this.parsePrintContinuation();
+    } else if (this.matchFirstSet(this.currentLexeme, "scope")) {
+      this.parsePrintContinuation();
+    } else {
+      let tokenSync = ["Identifier"];
+      let lexemeSync = ["}", "start"].concat(this.firstSet["commands"]);
+
+      this.errorHandler(
+        "Identifier, String, Number or Function",
+        this.currentLexeme,
+        this.currentLineNumber
+      );
+      this.sync(tokenSync, lexemeSync);
+
+      if (this.tokenPointer < this.tokens.length) {
+        if (this.matchFirstSet(this.currentLexeme, "commands")) {
+          this.parseCommands();
+        } else if (this.currentLexeme == "start") {
+          this.parseStart();
+        }
+      }
+    }
+  }
+
+  parsePrintContinuation() {
+    if (this.consume(",")) {
+      this.parsePrintContent();
+    } else if (this.check(")")) {
       this.parsePrintEnd();
     }
   }
 
-  parsePrintEnd () {
-    if (this.match(')')) {
-      this.accept(')')
-      if (this.match(';')) {
-        this.accept(';')
-        return
+  parsePrintEnd() {
+    if (this.consume(")")) {
+      if (this.consume(";")) {
+        return;
       } else {
-        let tokenSync = ['Identifier']
-        let lexemeSync = ['}', 'start'].concat(this.firstSet['commands'])
-        
-        this.errorHandler(';', this.currentLexeme, this.currentLineNumber);
-        this.sync(tokenSync, lexemeSync)
+        let tokenSync = ["Identifier"];
+        let lexemeSync = ["}", "start"].concat(this.firstSet["commands"]);
+
+        this.errorHandler(";", this.currentLexeme, this.currentLineNumber);
+        this.sync(tokenSync, lexemeSync);
 
         if (this.tokenPointer < this.tokens.length) {
-          if (this.matchFirstSet(this.currentLexeme, 'commands')) {
-            this.parseCommands()
-          } else if (this.currentLexeme == 'start') {
-            this.parseStart()
+          if (this.matchFirstSet(this.currentLexeme, "commands")) {
+            this.parseCommands();
+          } else if (this.currentLexeme == "start") {
+            this.parseStart();
           }
         }
       }
     }
   }
 
-  parseRead () {
-    if (this.match('read')) {
-      this.accept('read')
-      if (this.match('(')) {
-        this.accept('(')
-        this.parseReadContent()
+  parseRead() {
+    if (this.consume("read")) {
+      if (this.consume("(")) {
+        this.parseReadContent();
       }
     }
   }
 
-  parseReadContent () {
-    if (this.match('String', true) || this.match('Number') || this.match('Identifier', true) || this.matchFirstSet(this.currentLexeme, 'scope')) {
-      this.parseIdentifierWithoutFunction()
-      this.parseReadContinuation()
+  parseReadContent() {
+    if (
+      this.check("String", true) ||
+      this.check("Number") ||
+      this.check("Identifier", true) ||
+      this.matchFirstSet(this.currentLexeme, "scope")
+    ) {
+      this.parseIdentifierWithoutFunction();
+      this.parseReadContinuation();
     }
   }
 
-  parseReadContinuation () {
-    if (this.match(',')) {
-      this.accept(',')
-      this.parseReadContent()
-    } else if(this.match(')')) {
+  parseReadContinuation() {
+    if (this.consume(",")) {
+      this.parseReadContent();
+    } else if (this.check(")")) {
       this.parseReadEnd();
     }
   }
 
-  parseReadEnd () {
-    if (this.match(')')) {
-      this.accept(')')
-      if (this.match(';')) {
-        this.accept(';')
-        return
+  parseReadEnd() {
+    if (this.consume(")")) {
+      if (this.consume(";")) {
+        return;
       }
     }
   }
-  
-  parseBody () {
-    if (this.match('var')) {
+
+  parseBody() {
+    if (this.check("var")) {
       this.parseVar();
     }
     this.parseBody2();
-    if (this.match('}')) {
-      this.accept('}')
-      console.log('fechou func');
+    if (this.consume("}")) {
+      console.log("fechou func");
     }
-    //  else if (this.match('}')) {
-    //   this.accept('}')
-    //   console.log('fechou func');
-    // }
   }
 
-  parseBody2 () {
-    if (this.matchFirstSet(this.currentLexeme, 'commands') || this.match('Identifier', true) || this.matchFirstSet(this.currentLexeme,'scope')) {
-      this.parseCommands()
-      this.parseBody2()
+  parseBody2() {
+    if (
+      this.matchFirstSet(this.currentLexeme, "commands") ||
+      this.check("Identifier", true) ||
+      this.matchFirstSet(this.currentLexeme, "scope")
+    ) {
+      this.parseCommands();
+      this.parseBody2();
+      if (this.consume("}")) {
+        console.log("fechou func");
+      }
     }
   }
 
   parseCommands() {
-    if (this.match('if')) {
-      this.parseConditional()
-    } else if (this.match('while')) {
-      this.parseLoop()
-    } else if (this.match('read')) {
-      this.parseRead()
-    } else if (this.match('print')) {
-      this.parsePrint()
-    } else if (this.match('return')) {
-      this.parseReturn()
-    } else if (this.match('Identifier', true) || this.matchFirstSet(this.currentLexeme, 'scope')) {
-      this.parseIdentifierCommands()
+    if (this.check("if")) {
+      this.parseConditional();
+    } else if (this.check("while")) {
+      this.parseLoop();
+    } else if (this.check("read")) {
+      this.parseRead();
+    } else if (this.check("print")) {
+      this.parsePrint();
+    } else if (this.check("return")) {
+      this.parseReturn();
+    } else if (
+      this.consume("Identifier", true) ||
+      this.matchFirstSet(this.currentLexeme, "scope")
+    ) {
+      this.parseIdentifierCommands();
     }
   }
-  
-  parseIdentifierCommands () {
-    if (this.match('String', true) || this.match('Number') || this.match('Identifier', true) || this.matchFirstSet(this.currentLexeme, 'scope')) {
-      this.parseIdentifierWithoutFunction()
-      this.parseIdentifierCommands2()
-      if (this.match(';')) {
-        this.accept(';')
-        return
+
+  parseIdentifierCommands() {
+    if (
+      this.consume("String", true) ||
+      this.consume("Number") ||
+      this.consume("Identifier", true) ||
+      this.matchFirstSet(this.currentLexeme, "scope")
+    ) {
+      this.parseIdentifierWithoutFunction();
+      this.parseIdentifierCommands2();
+      if (this.consume(";")) {
+        return;
       }
     }
   }
 
-  parseIdentifierCommands2 () {
-    if (this.match('=')) {
-      this.accept('=')
-      this.parseIdentifierCommands2_1()
-    } else if (this.match('(')) {
-      this.accept('(')
+  parseIdentifierCommands2() {
+    if (this.consume("=")) {
+      this.parseIdentifierCommands2_1();
+    } else if (this.consume("(")) {
       this.parseParametersList();
-      if (this.match(')')) {
-        this.accept(')')
-        return
+      if (this.consume(")")) {
+        return;
       }
     }
   }
 
-  parseIdentifierCommands2_1 () {
-    if (this.match('String', true) || this.match('Number') ){
-      this.accept(this.currentLexeme);
-    } else if (this.matchFirstSet(this.currentLexeme, 'arithmetic_expression') || this.match('Identifier', true)) {
-      this.parseArithmeticExpression()
+  parseIdentifierCommands2_1() {
+    if (this.consume("String", true) || this.consume("Number")) {
+    } else if (
+      this.matchFirstSet(this.currentLexeme, "arithmetic_expression") ||
+      this.consume("Identifier", true)
+    ) {
+      this.parseArithmeticExpression();
     }
   }
 
-  parseReturn () {
-    if (this.match('return')) {
-      this.accept('return')
-      this.parseReturnCode()
+  parseReturn() {
+    if (this.consume("return")) {
+      this.parseReturnCode();
     }
   }
 
-  parseReturnCode () {
-    if (this.match(';')) {
-      this.accept(';')
-      return
-    } else if (this.matchFirstSet(this.currentLexeme, 'arithmetic_expression')
-      || this.match('Number', true)
-      || this.match('Identifier', true)) {
-
-      this.parseArithmeticExpression()
-      if (this.match(';')) {
-        this.accept(';')
-        return
+  parseReturnCode() {
+    if (this.consume(";")) {
+      return;
+    } else if (
+      this.matchFirstSet(this.currentLexeme, "arithmetic_expression") ||
+      this.consume("Number", true) ||
+      this.consume("Identifier", true)
+    ) {
+      this.parseArithmeticExpression();
+      if (this.consume(";")) {
+        return;
       }
     }
   }
-  
-    /**
+
+  /**
    * Generate Function And Procedure
    */
 
-  parseGenerateFuncAndProc () {
-    if (this.match('function')) {
+  parseGenerateFuncAndProc() {
+    if (this.check("function")) {
       this.parseFunction();
       this.parseGenerateFuncAndProc();
-    } else if (this.match('procedure')) {
+    } else if (this.check("procedure")) {
       this.parseProcedure();
       this.parseGenerateFuncAndProc();
     }
   }
 
-  parseFunction () {
-    if (this.match('function')) {
-      this.accept('function')
-      if (this.matchType()) {
-        this.acceptType()
-        if (this.match('Identifier', true)) {
-          this.accept('Identifier', true)
-          if (this.match('(')) {
-            this.accept('(')
+  parseFunction() {
+    if (this.consume("function")) {
+      if (this.consumeType()) {
+        if (this.consume("Identifier", true)) {
+          if (this.consume("(")) {
             this.parseParam();
           }
         }
@@ -1578,104 +895,65 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseProcedure () {
-    console.log('abriu procedure')
-    if (this.match('procedure')) {
-      this.accept('procedure')
-      if (this.match('Identifier', true)) {
-        this.accept('Identifier', true)
-        if (this.match('(')) {
-          this.accept('(')
+  parseProcedure() {
+    console.log("abriu procedure");
+    if (this.consume("procedure")) {
+      if (this.consume("Identifier", true)) {
+        if (this.consume("(")) {
           this.parseParam();
         }
       }
     }
   }
 
-  parseParam () {
-    if (this.matchType()) {
-      this.acceptType()
-      if(this.match('Identifier', true)) {
-        this.accept('Identifier', true)
-        this.parseParam2()
-        this.parseParam1()
+  parseParam() {
+    if (this.consumeType()) {
+      if (this.consume("Identifier", true)) {
+        this.parseParam2();
+        this.parseParam1();
       }
     }
   }
 
-  parseParam1 () {
-    if (this.match(',')) {
-      this.accept(',')
+  parseParam1() {
+    if (this.consume(",")) {
       this.parseParam();
-    } else if (this.match(')')) {
-      this.accept(')')
+    } else if (this.consume(")")) {
       this.parseF2();
     }
   }
 
-  parseParam2 () {
-    if (this.match('[')) {
-      this.accept('[')
-      if (this.match(']')) {
-        this.accept(']')
+  parseParam2() {
+    if (this.consume("[")) {
+      if (this.consume("]")) {
         this.parseParam3();
       }
     }
   }
 
-  parseParam3 () {
-    if (this.match('[')) {
-      this.accept('[')
-      if (this.match(']')) {
-        this.accept(']')
-        return
+  parseParam3() {
+    if (this.consume("[")) {
+      if (this.consume("]")) {
+        return;
       }
     }
   }
 
-  parseF2 () {
-    if (this.match('{')) {
-      this.accept('{')
-      console.log('abriu func');
+  parseF2() {
+    if (this.consume("{")) {
+      console.log("abriu func");
       this.parseBody();
     }
   }
 
   parseStart() {
-    if (this.match('start')) {
-      this.accept('start')
-      if (this.match('(')) {
-        this.accept('(')
-        if (this.match(')')) {
-          this.accept(')')
-          if (this.match('{')) {
-            this.accept('{')
-            this.parseBody()
-            if (this.match('}')) {
-              this.accept('}')
-              return
-            }
-          }
-        }
-      }
-    }
-  }
-
-  parseLoop () {
-    if(this.match('while')) {
-      this.accept('while')
-      if (this.match('(')) {
-        this.accept('(')
-        this.parseLogicalRelationalExpression();
-        if (this.match(')')) {
-          this.accept(')')
-          if (this.match('{')) {
-            this.accept('{')
+    if (this.consume("start")) {
+      if (this.consume("(")) {
+        if (this.consume(")")) {
+          if (this.consume("{")) {
             this.parseBody();
-            if (this.match( '}')) {
-              this.accept( '}')
-              console.log('fechou while')
-              return
+            if (this.consume("}")) {
+              return;
             }
           }
         }
@@ -1683,21 +961,32 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseConditional () {
-    if(this.match('if')) {
-      this.accept('if')
-      if (this.match('(')) {
-        this.accept('(')
+  parseLoop() {
+    if (this.consume("while")) {
+      if (this.consume("(")) {
         this.parseLogicalRelationalExpression();
-        if (this.match(')')) {
-          this.accept(')')
-          if (this.match('then')) {
-            this.accept('then')
-            if (this.match('{')) {
-              this.accept('{')
+        if (this.consume(")")) {
+          if (this.consume("{")) {
+            this.parseBody();
+            if (this.consume("}")) {
+              console.log("fechou while");
+              return;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  parseConditional() {
+    if (this.consume("if")) {
+      if (this.consume("(")) {
+        this.parseLogicalRelationalExpression();
+        if (this.consume(")")) {
+          if (this.consume("then")) {
+            if (this.consume("{")) {
               this.parseBody();
-              if (this.match('}')) {
-                this.accept('}')
+              if (this.consume("}")) {
                 this.parseConditionalEnd();
               }
             }
@@ -1707,31 +996,48 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseConditionalEnd () {
-    if (this.match('else')) {
-      this.accept('else')
-      if (this.match('{')) {
-        this.accept('{')
-        this.parseBody()
-        if (this.match('}')) {
-          this.accept('}')
-          return
+  parseConditionalEnd() {
+    if (this.consume("else")) {
+      if (this.consume("{")) {
+        this.parseBody();
+        if (this.consume("}")) {
+          return;
         }
       }
     }
   }
 
-  matchFirstSet (lexeme, set) {
-    return this.firstSet[set].includes(lexeme)
+  matchFirstSet(lexeme, set) {
+    return this.firstSet[set].includes(lexeme);
   }
 
-  mountFirstSets () {
-    this.firstSet['scope'] = ['local', 'global'];
-    this.firstSet['identifier_access'] = ['.', '['];
-    this.firstSet['t2'] = ['*', '/'];
-    this.firstSet['arithmetic_expression'] = ['++', '--', '(', 'local', 'global']
-    this.firstSet['commands'] = ['while', 'if', 'print', 'read', 'return']
+  mountFirstSets() {
+    this.firstSet["scope"] = ["local", "global"];
+    this.firstSet["identifier_access"] = [".", "["];
+    this.firstSet["t2"] = ["*", "/"];
+    this.firstSet["arithmetic_expression"] = [
+      "++",
+      "--",
+      "(",
+      "local",
+      "global"
+    ];
+    this.firstSet["commands"] = ["while", "if", "print", "read", "return"];
+  }
+
+  followSets(key) {
+    let sets = {
+      const: {
+        tokens: [],
+        lexemes: ["typedef", "var", "function", "procedure", "start"]
+      },
+      typeConst: {
+        tokens: [],
+        lexemes: ["typedef", "var", "function", "procedure", "start"]
+      }
+    };
+    return sets[key];
   }
 }
 
-module.exports = SyntaticalAnalyzer
+module.exports = SyntaticalAnalyzer;

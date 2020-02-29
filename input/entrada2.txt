@@ -28,7 +28,7 @@ function int opa (int a, real b) {
   }
 
   print("a");
-  //read(c);
+  read(c);
 }
 
 procedure b (int a) {

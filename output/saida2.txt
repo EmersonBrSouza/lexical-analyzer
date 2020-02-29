@@ -84,6 +84,11 @@ Lista de Tokens:
 30 "a" String
 30 ) Delimiter
 30 ; Delimiter
+31 read Reserved Word
+31 ( Delimiter
+31 c Identifier
+31 ) Delimiter
+31 ; Delimiter
 32 } Delimiter
 34 procedure Reserved Word
 34 b Identifier
