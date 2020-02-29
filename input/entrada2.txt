@@ -1,6 +1,6 @@
 const {
   int a 2;
-  boolean b 7;
+  boolean b 3;
 }
 
 typedef struct o {
@@ -8,18 +8,17 @@ typedef struct o {
   int a;
 }
 
-
 var {
   int c = 2;
-  int a;
-  int a[2];
-  int b[c][a];
+  int a = 2;
+  int a[a];
+  int b[c][2];
 }
 
 
-function int opa (int a, real b) {
+function int a (int a, real b[][]) {
 
-  var {
+  /*var {
     int b = c;
   }
   
@@ -27,11 +26,35 @@ function int opa (int a, real b) {
     print(aa);
   }
 
+  if (c < d) then {
+
+  } else {
+    print(d);
+  }
+
+  if ("2" >= d) then {
+    
+  } else {
+    print(d);
+  }
+
+  if ("2" >= d || a == b) then {
+    
+  } else {
+    print(d);
+  }
+
+  b++;
+
+  c = w--;
+
   print("a");
   read(c);
+
+  return a;*/
 }
 
-procedure b (int a) {
+procedure o (int p) {
 
 }
 

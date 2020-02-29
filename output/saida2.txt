@@ -7,7 +7,7 @@ Lista de Tokens:
 2 ; Delimiter
 3 boolean Reserved Word
 3 b Identifier
-3 7 Number
+3 3 Number
 3 ; Delimiter
 4 } Delimiter
 6 typedef Reserved Word
@@ -21,87 +21,62 @@ Lista de Tokens:
 8 a Identifier
 8 ; Delimiter
 9 } Delimiter
-12 var Reserved Word
-12 { Delimiter
+11 var Reserved Word
+11 { Delimiter
+12 int Reserved Word
+12 c Identifier
+12 = Attribuition Operator
+12 2 Number
+12 ; Delimiter
 13 int Reserved Word
-13 c Identifier
+13 a Identifier
 13 = Attribuition Operator
 13 2 Number
 13 ; Delimiter
 14 int Reserved Word
 14 a Identifier
+14 [ Delimiter
+14 a Identifier
+14 ] Delimiter
 14 ; Delimiter
 15 int Reserved Word
-15 a Identifier
+15 b Identifier
+15 [ Delimiter
+15 c Identifier
+15 ] Delimiter
 15 [ Delimiter
 15 2 Number
 15 ] Delimiter
 15 ; Delimiter
-16 int Reserved Word
-16 b Identifier
-16 [ Delimiter
-16 c Identifier
-16 ] Delimiter
-16 [ Delimiter
-16 a Identifier
-16 ] Delimiter
-16 ; Delimiter
-17 } Delimiter
-20 function Reserved Word
-20 int Reserved Word
-20 opa Identifier
-20 ( Delimiter
-20 int Reserved Word
-20 a Identifier
-20 , Delimiter
-20 real Reserved Word
-20 b Identifier
-20 ) Delimiter
-20 { Delimiter
-22 var Reserved Word
-22 { Delimiter
-23 int Reserved Word
-23 b Identifier
-23 = Attribuition Operator
-23 c Identifier
-23 ; Delimiter
-24 } Delimiter
-26 while Reserved Word
-26 ( Delimiter
-26 b Identifier
-26 == Relational Operator
-26 -2 Number
-26 ) Delimiter
-26 { Delimiter
-27 print Reserved Word
-27 ( Delimiter
-27 aa Identifier
-27 ) Delimiter
-27 ; Delimiter
-28 } Delimiter
-30 print Reserved Word
-30 ( Delimiter
-30 "a" String
-30 ) Delimiter
-30 ; Delimiter
-31 read Reserved Word
-31 ( Delimiter
-31 c Identifier
-31 ) Delimiter
-31 ; Delimiter
-32 } Delimiter
-34 procedure Reserved Word
-34 b Identifier
-34 ( Delimiter
-34 int Reserved Word
-34 a Identifier
-34 ) Delimiter
-34 { Delimiter
-36 } Delimiter
-38 start Reserved Word
-38 ( Delimiter
-38 ) Delimiter
-38 { Delimiter
-40 } Delimiter
+16 } Delimiter
+19 function Reserved Word
+19 int Reserved Word
+19 a Identifier
+19 ( Delimiter
+19 int Reserved Word
+19 a Identifier
+19 , Delimiter
+19 real Reserved Word
+19 b Identifier
+19 [ Delimiter
+19 ] Delimiter
+19 [ Delimiter
+19 ] Delimiter
+19 ) Delimiter
+19 { Delimiter
+22 } Delimiter
+24 procedure Reserved Word
+24 o Identifier
+24 ( Delimiter
+24 int Reserved Word
+24 p Identifier
+24 ) Delimiter
+24 { Delimiter
+26 } Delimiter
+28 start Reserved Word
+28 ( Delimiter
+28 ) Delimiter
+28 { Delimiter
+30 } Delimiter
 
 Lista de Erros:

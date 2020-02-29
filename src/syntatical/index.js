@@ -106,21 +106,21 @@ class SyntaticalAnalyzer {
     console.log(this.currentLexeme);
   }
 
-  isBoolean (except = null) {
+  isBoolean () {
     if (Definitions.boolean.includes(this.currentLexeme)) {
       return true;
     }
     return false;
   }
 
-  isRelationalOperator (except = null) {
+  isRelationalOperator () {
     if (Definitions.relationalOperator.includes(this.currentLexeme)) {
       return true;
     }
     return false;
   }
 
-  isLogicalOperator (except = null) {
+  isLogicalOperator () {
     if (Definitions.logicalOperator.includes(this.currentLexeme)) {
       return true;
     }
@@ -164,7 +164,6 @@ class SyntaticalAnalyzer {
     if (this.consume("const")) {
       if (this.consume("{")) {
         this.parseTypeConst();
-        // this.parseConstTermination();
       } else {
         this.handleError("{", this.currentLexeme, this.currentLine);
         this.sync(this.followSets("const"));
@@ -311,6 +310,16 @@ class SyntaticalAnalyzer {
       }
     } else if (this.consume("{")) {
       this.parseTypeStruct();
+    } else {
+      this.handleError("extends or {", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("struct"));
+      switch (this.currentLexeme) {
+        case "var": this.parseVar(); break;
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -323,6 +332,16 @@ class SyntaticalAnalyzer {
   parseStructExpression() {
     if (this.consume("Identifier", true)) {
       this.parseStructContinuation();
+    } else {
+      this.handleError("Identifier or int, boolean, string, real", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("struct"));
+      switch (this.currentLexeme) {
+        case "var": this.parseVar(); break;
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -332,7 +351,7 @@ class SyntaticalAnalyzer {
     } else if (this.consume(";")) {
       this.parseStructTermination();
     } else {
-      this.handleError("Struct Type", this.currentLexeme, this.currentLine);
+      this.handleError(", or ;", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("typeStruct"));
       switch (this.currentLexeme) {
         case "var": this.parseVar(); break;
@@ -357,8 +376,9 @@ class SyntaticalAnalyzer {
       return;
     } else if (this.checkType()) {
       this.parseTypeStruct();
+      return;
     } else {
-      this.handleError("Invalid Attribute", null, this.currentLine);
+      this.handleError("}", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("struct"));
       switch (this.currentLexeme) {
         case "var": this.parseVar(); break;
@@ -374,6 +394,15 @@ class SyntaticalAnalyzer {
     if (this.consume("var")) {
       if (this.consume("{")) {
         this.parseTypeVar();
+      } else {
+        this.handleError("{", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("var"));
+        switch (this.currentLexeme) {
+          case "function": this.parseGenerateFuncAndProc(); break;
+          case "procedure": this.parseGenerateFuncAndProc(); break;
+          case "start": this.parseGenerateFuncAndProc(); break;
+          case this.eof(): return;
+        }
       }
     }
   }
@@ -387,6 +416,16 @@ class SyntaticalAnalyzer {
   parseVarExpression() {
     if (this.consume("Identifier", true)) {
       this.parseVarContinuation();
+    } else {
+      this.handleError("Identifier or int, boolean, string, real", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("var"));
+      switch (this.currentLexeme) {
+        case "var": this.parseVar(); break;
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -401,6 +440,23 @@ class SyntaticalAnalyzer {
       if (this.consumeValue()) {
         this.parseVarAttribuition();
       }
+    } else {
+      this.handleError(", or ; or = or [", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("typeVar"));
+      switch (this.currentLexeme) {
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case "}":
+          this.nextToken();
+          this.parseGenerateFuncAndProc();
+          break;
+        case "real": this.parseTypeVar(); break;
+        case "boolean": this.parseTypeVar(); break;
+        case "int": this.parseTypeVar(); break;
+        case "string": this.parseTypeVar(); break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -409,14 +465,41 @@ class SyntaticalAnalyzer {
       this.parseVarExpression();
     } else if (this.consume(";")) {
       this.parseVarTermination();
+    } else {
+      this.handleError(", or ;", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("typeVar"));
+      switch (this.currentLexeme) {
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case "}":
+          this.nextToken();
+          this.parseGenerateFuncAndProc();
+          break;
+        case "real": this.parseTypeVar(); break;
+        case "boolean": this.parseTypeVar(); break;
+        case "int": this.parseTypeVar(); break;
+        case "string": this.parseTypeVar(); break;
+        case this.eof(): return;
+      }
     }
   }
 
   parseVarTermination() {
     if (this.consume("}")) {
       return;
-    } else if (this.checkType()) {
+    } else if (this.checkType(true)) {
       this.parseTypeVar();
+      return;
+    } else {
+      this.handleError("}", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("var"));
+      switch (this.currentLexeme) {
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -425,6 +508,40 @@ class SyntaticalAnalyzer {
       if (this.consumeVectorIndex()) {
         if (this.consume("]")) {
           this.parseMatrix();
+        } else {
+          this.handleError("]", this.currentLexeme, this.currentLine);
+          this.sync(this.followSets("var"));
+          switch (this.currentLexeme) {
+            case "function": this.parseGenerateFuncAndProc(); break;
+            case "procedure": this.parseGenerateFuncAndProc(); break;
+            case "start": this.parseGenerateFuncAndProc(); break;
+            case "}":
+            this.nextToken();
+            this.parseGenerateFuncAndProc();
+            break;
+            case "real": this.parseTypeVar(); break;
+            case "boolean": this.parseTypeVar(); break;
+            case "int": this.parseTypeVar(); break;
+            case "string": this.parseTypeVar(); break;
+            case this.eof(): return;
+          }
+        }
+      } else {
+        this.handleError("Vector index: an Identifier or a positive integer", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("var"));
+        switch (this.currentLexeme) {
+          case "function": this.parseGenerateFuncAndProc(); break;
+          case "procedure": this.parseGenerateFuncAndProc(); break;
+          case "start": this.parseGenerateFuncAndProc(); break;
+          case "}":
+          this.nextToken();
+          this.parseGenerateFuncAndProc();
+          break;
+          case "real": this.parseTypeVar(); break;
+          case "boolean": this.parseTypeVar(); break;
+          case "int": this.parseTypeVar(); break;
+          case "string": this.parseTypeVar(); break;
+          case this.eof(): return;
         }
       }
     }
@@ -435,6 +552,40 @@ class SyntaticalAnalyzer {
       if (this.consumeVectorIndex()) {
         if (this.consume("]")) {
           this.parseVarAttribuition();
+        } else {
+          this.handleError("]", this.currentLexeme, this.currentLine);
+          this.sync(this.followSets("var"));
+          switch (this.currentLexeme) {
+            case "function": this.parseGenerateFuncAndProc(); break;
+            case "procedure": this.parseGenerateFuncAndProc(); break;
+            case "start": this.parseGenerateFuncAndProc(); break;
+            case "}":
+            this.nextToken();
+            this.parseGenerateFuncAndProc();
+            break;
+            case "real": this.parseTypeVar(); break;
+            case "boolean": this.parseTypeVar(); break;
+            case "int": this.parseTypeVar(); break;
+            case "string": this.parseTypeVar(); break;
+            case this.eof(): return;
+          }
+        }
+      } else {
+        this.handleError("Vector index: an Identifier or a positive integer", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("var"));
+        switch (this.currentLexeme) {
+          case "function": this.parseGenerateFuncAndProc(); break;
+          case "procedure": this.parseGenerateFuncAndProc(); break;
+          case "start": this.parseGenerateFuncAndProc(); break;
+          case "}":
+          this.nextToken();
+          this.parseGenerateFuncAndProc();
+          break;
+          case "real": this.parseTypeVar(); break;
+          case "boolean": this.parseTypeVar(); break;
+          case "int": this.parseTypeVar(); break;
+          case "string": this.parseTypeVar(); break;
+          case this.eof(): return;
         }
       }
     } else {
@@ -446,8 +597,8 @@ class SyntaticalAnalyzer {
   parseParametersList() {
     if (
       this.matchFirstSet(this.currentLexeme, "scope") ||
-      this.consume("Number", true) ||
-      this.consume("String", true)
+      this.check("Number", true) ||
+      this.check("String", true)
     ) {
       this.parseParametersListEnd();
       this.parseParametersListContinuation();
@@ -861,7 +1012,14 @@ class SyntaticalAnalyzer {
     }
     this.parseBody2();
     if (this.consume("}")) {
-      console.log("fechou func");
+      return;
+    } else {
+      this.handleError("}", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("generateFuncAndProc"));
+      switch (this.currentLexeme) {
+        case this.eof(): return;
+        default: this.parseGenerateFuncAndProc(); break;
+      }
     }
   }
 
@@ -971,22 +1129,113 @@ class SyntaticalAnalyzer {
 
   parseFunction() {
     if (this.consume("function")) {
-      if (this.consumeType()) {
+      if (this.consumeType(true)) {
         if (this.consume("Identifier", true)) {
           if (this.consume("(")) {
             this.parseParam();
+          } else {
+            this.handleError("(", this.currentLexeme, this.currentLine);
+            this.sync(this.followSets("parameters"));
+            switch (this.currentLexeme) {
+              case "int": this.parseParam(); break;
+              case "real": this.parseParam(); break;
+              case "boolean": this.parseParam(); break;
+              case "string": this.parseParam(); break;
+              case "{":
+                this.nextToken();
+                this.parseBody();
+                break;
+              case this.currentToken == "Identifier": 
+                this.nextToken();
+                this.parseParam();
+                break;
+              case this.eof(): return;
+            }
           }
+        } else {
+          this.handleError("Identifier", this.currentLexeme, this.currentLine);
+          this.sync(this.followSets("typeFunction"));
+          switch (this.currentLexeme) {
+            case "function": this.parseFunction(); break;
+            case "procedure": this.parseProcedure(); break;
+            case "start": this.parseStart(); break;
+            case "{":
+              this.nextToken();
+              this.parseGenerateFuncAndProc();
+              break;
+            case "(": 
+              this.nextToken();
+              this.parseParam();
+              break;
+            case this.currentToken == "Identifier": 
+              this.nextToken();
+              this.parseParam();
+              break;
+            case this.eof(): return;
+          }
+        }
+      } else {
+        this.handleError("int, real, string, boolean or Identifier", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("typeFunction"));
+        switch (this.currentLexeme) {
+          case "function": this.parseFunction(); break;
+          case "procedure": this.parseProcedure(); break;
+          case "start": this.parseStart(); break;
+          case "{":
+            this.nextToken();
+            this.parseGenerateFuncAndProc();
+            break;
+          case "(": 
+            this.nextToken();
+            this.parseParam();
+            break;
+          case this.currentToken == "Identifier": 
+            this.nextToken();
+            this.parseParam();
+            break;
+          case this.eof(): return;
         }
       }
     }
   }
 
   parseProcedure() {
-    console.log("abriu procedure");
     if (this.consume("procedure")) {
       if (this.consume("Identifier", true)) {
         if (this.consume("(")) {
           this.parseParam();
+        } else {
+          this.handleError("(", this.currentLexeme, this.currentLine);
+          this.sync(this.followSets("parameters"));
+          switch (this.currentLexeme) {
+            case "int": this.parseParam(); break;
+            case "real": this.parseParam(); break;
+            case "boolean": this.parseParam(); break;
+            case "string": this.parseParam(); break;
+            case "{":
+              this.nextToken();
+              this.parseBody();
+              break;
+            case this.currentToken == "Identifier": 
+              this.nextToken();
+              this.parseParam();
+              break;
+            case this.eof(): return;
+          }
+        }
+      } else {
+        this.handleError("Identifier", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("procedure"));
+        switch (this.currentLexeme) {
+          case "{": this.parseF2(); break;
+          case "function": this.parseFunction(); break;
+          case "procedure": this.parseProcedure(); break;
+          case "(": 
+            this.nextToken();
+            this.parseParam();
+            break;
+          case this.eof(): return;
+          default: this.parseCommands(); break;
         }
       }
     }
@@ -997,6 +1246,24 @@ class SyntaticalAnalyzer {
       if (this.consume("Identifier", true)) {
         this.parseParam2();
         this.parseParam1();
+      } else {
+        this.handleError("Identifier", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("parameters"));
+        switch (this.currentLexeme) {
+          case "int": this.parseParam(); break;
+          case "real": this.parseParam(); break;
+          case "boolean": this.parseParam(); break;
+          case "string": this.parseParam(); break;
+          case "{":
+            this.nextToken();
+            this.parseBody();
+            break;
+          case this.currentToken == "Identifier": 
+            this.nextToken();
+            this.parseParam();
+            break;
+          case this.eof(): return;
+        }
       }
     }
   }
@@ -1006,6 +1273,23 @@ class SyntaticalAnalyzer {
       this.parseParam();
     } else if (this.consume(")")) {
       this.parseF2();
+    } else {
+      this.handleError(", or )", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("parameters"));
+      switch (this.currentLexeme) {
+        case "int": this.parseParam(); break;
+        case "real": this.parseParam(); break;
+        case "boolean": this.parseParam(); break;
+        case "string": this.parseParam(); break;
+        case "{":
+          this.parseF2();
+          break;
+        case this.currentToken == "Identifier": 
+          this.nextToken();
+          this.parseParam();
+          break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -1013,6 +1297,23 @@ class SyntaticalAnalyzer {
     if (this.consume("[")) {
       if (this.consume("]")) {
         this.parseParam3();
+      } else {
+        this.handleError("]", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("parameters"));
+        switch (this.currentLexeme) {
+          case "int": this.parseParam(); break;
+          case "real": this.parseParam(); break;
+          case "boolean": this.parseParam(); break;
+          case "string": this.parseParam(); break;
+          case "{":
+            this.parseF2();
+            break;
+          case this.currentToken == "Identifier": 
+            this.nextToken();
+            this.parseParam();
+            break;
+          case this.eof(): return;
+        }
       }
     }
   }
@@ -1021,14 +1322,37 @@ class SyntaticalAnalyzer {
     if (this.consume("[")) {
       if (this.consume("]")) {
         return;
+      } else {
+        this.handleError("]", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("parameters"));
+        switch (this.currentLexeme) {
+          case "int": this.parseParam(); break;
+          case "real": this.parseParam(); break;
+          case "boolean": this.parseParam(); break;
+          case "string": this.parseParam(); break;
+          case "{":
+            this.parseF2();
+            break;
+          case this.currentToken == "Identifier": 
+            this.nextToken();
+            this.parseParam();
+            break;
+          case this.eof(): return;
+        }
       }
     }
   }
 
   parseF2() {
     if (this.consume("{")) {
-      console.log("abriu func");
       this.parseBody();
+    } else {
+      this.handleError("{", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("functionBody"));
+      switch (this.currentLexeme) {
+        case this.eof(): return;
+        default: this.parseBody(); break;
+      }
     }
   }
 
@@ -1123,7 +1447,39 @@ class SyntaticalAnalyzer {
       },
       struct: {
         tokens: [],
-        lexemes: ["var", "function", "procedure", "start"]
+        lexemes: ["typedef", "var", "function", "procedure", "start"]
+      },
+      typeStruct: {
+        tokens: ["Identifier"],
+        lexemes: ["typedef", "var", "function", "procedure", "start", 'boolean', '}', 'int', 'real', 'string']
+      },
+      var: {
+        tokens: [],
+        lexemes: ["function", "procedure", "start"]
+      },
+      typeVar: {
+        tokens: ["Identifier"],
+        lexemes: ["function", "procedure", "start", 'boolean', '}', 'int', 'real', 'string']
+      },
+      typeFunction: {
+        tokens: ["Identifier"],
+        lexemes: ["function", "procedure", "start", "{", "("]
+      },
+      parameters: {
+        tokens: ["Identifier"],
+        lexemes: ["int", "boolean", "string", "real", "{"]
+      },
+      functionBody: {
+        tokens: ["Identifier"],
+        lexemes: ["while", "if", "print", "read", "return", "var"]
+      },
+      procedure: {
+        tokens: [],
+        lexemes: ["while", "if", "print", "read", "var", '(', '{', 'function', 'procedure'] 
+      },
+      generateFuncAndProc: {
+        tokens: [],
+        lexemes: ['function', 'procedure'] 
       }
     };
     return sets[key];
