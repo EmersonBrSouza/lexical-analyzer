@@ -178,13 +178,21 @@ class SyntaticalAnalyzer {
       this.parseConstExpression();
     } else {
       this.handleError("Const Type", this.currentLexeme, this.currentLine);
-      this.sync(this.followSets("const"));
+      this.sync(this.followSets("typeConst"));
       switch (this.currentLexeme) {
         case "typedef": this.parseStruct(); break;
         case "var": this.parseVar(); break;
         case "function": this.parseGenerateFuncAndProc(); break;
         case "procedure": this.parseGenerateFuncAndProc(); break;
         case "start": this.parseGenerateFuncAndProc(); break;
+        case "}":
+          this.nextToken();
+          this.parseStruct();
+          break;
+        case "real": this.parseTypeConst(); break;
+        case "boolean": this.parseTypeConst(); break;
+        case "int": this.parseTypeConst(); break;
+        case "string": this.parseTypeConst(); break;
         case this.eof(): return;
       }
     }
@@ -225,6 +233,19 @@ class SyntaticalAnalyzer {
       this.parseConstExpression();
     } else if (this.consume(";")) {
       this.parseConstTermination();
+    } else if (this.check('}')) {
+      this.parseConstTermination();
+    } else {
+      this.handleError(", or ;", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("const"));
+      switch (this.currentLexeme) {
+        case "typedef": this.parseStruct(); break;
+        case "var": this.parseVar(); break;
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -233,6 +254,17 @@ class SyntaticalAnalyzer {
       return;
     } else if (this.checkType()) {
       this.parseTypeConst();
+    } else {
+      this.handleError("Invalid Const Attribute", null, this.currentLine);
+      this.sync(this.followSets("const"));
+      switch (this.currentLexeme) {
+        case "typedef": this.parseStruct(); break;
+        case "var": this.parseVar(); break;
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -1033,7 +1065,7 @@ class SyntaticalAnalyzer {
       },
       typeConst: {
         tokens: [],
-        lexemes: ["typedef", "var", "function", "procedure", "start"]
+        lexemes: ["typedef", "var", "function", "procedure", "start", 'boolean', '}', 'int', 'real', 'string']
       }
     };
     return sets[key];
