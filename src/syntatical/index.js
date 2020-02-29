@@ -32,8 +32,11 @@ class SyntaticalAnalyzer {
     }
   }
 
-  checkType() {
-    return Definitions.types.includes(this.currentLexeme);
+  checkType(includeId = false) {
+    if (includeId) {
+      return Definitions.types.includes(this.currentLexeme) || this.currentToken == 'Identifier';
+    }
+    return Definitions.types.includes(this.currentLexeme)
   }
 
   checkValue() {
@@ -67,8 +70,8 @@ class SyntaticalAnalyzer {
     }
   }
 
-  consumeType() {
-    if (this.checkType()) {
+  consumeType(includeId = false) {
+    if (this.checkType(includeId)) {
       this.consume(this.currentLexeme);
       return true;
     } else {
@@ -128,6 +131,8 @@ class SyntaticalAnalyzer {
     console.log(
       `Esperava '${expected}' mas recebeu '${received}' na linha ${line}`
     );
+
+    this.errors.push({ expected, received, line });
   }
 
   sync(followSet) {
@@ -152,12 +157,14 @@ class SyntaticalAnalyzer {
     this.parseStruct();
     this.parseVar();
     this.parseGenerateFuncAndProc();
+    console.table(this.errors)
   }
 
   parseConst() {
     if (this.consume("const")) {
       if (this.consume("{")) {
         this.parseTypeConst();
+        // this.parseConstTermination();
       } else {
         this.handleError("{", this.currentLexeme, this.currentLine);
         this.sync(this.followSets("const"));
@@ -174,10 +181,10 @@ class SyntaticalAnalyzer {
   }
 
   parseTypeConst() {
-    if (this.consumeType(this.currentLexeme)) {
+    if (this.consumeType(false)) {
       this.parseConstExpression();
     } else {
-      this.handleError("Const Type", this.currentLexeme, this.currentLine);
+      this.handleError("int, real, boolean or string", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("typeConst"));
       switch (this.currentLexeme) {
         case "typedef": this.parseStruct(); break;
@@ -233,8 +240,6 @@ class SyntaticalAnalyzer {
       this.parseConstExpression();
     } else if (this.consume(";")) {
       this.parseConstTermination();
-    } else if (this.check('}')) {
-      this.parseConstTermination();
     } else {
       this.handleError(", or ;", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("const"));
@@ -250,12 +255,13 @@ class SyntaticalAnalyzer {
   }
 
   parseConstTermination() {
-    if (this.consume("}")) {
-      return;
-    } else if (this.checkType()) {
+    if (this.checkType()) {
       this.parseTypeConst();
+      return;
+    } else if (this.consume("}")) {
+      return;
     } else {
-      this.handleError("Invalid Const Attribute", null, this.currentLine);
+      this.handleError("}", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("const"));
       switch (this.currentLexeme) {
         case "typedef": this.parseStruct(); break;
@@ -273,6 +279,26 @@ class SyntaticalAnalyzer {
       if (this.consume("struct")) {
         if (this.consume("Identifier", true)) {
           this.parseStructExtends();
+        } else {
+          this.handleError("Identifier", this.currentLexeme, this.currentLine);
+          this.sync(this.followSets("struct"));
+          switch (this.currentLexeme) {
+            case "var": this.parseVar(); break;
+            case "function": this.parseGenerateFuncAndProc(); break;
+            case "procedure": this.parseGenerateFuncAndProc(); break;
+            case "start": this.parseGenerateFuncAndProc(); break;
+            case this.eof(): return;
+          }
+        }
+      } else {
+        this.handleError("struct", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("struct"));
+        switch (this.currentLexeme) {
+          case "var": this.parseVar(); break;
+          case "function": this.parseGenerateFuncAndProc(); break;
+          case "procedure": this.parseGenerateFuncAndProc(); break;
+          case "start": this.parseGenerateFuncAndProc(); break;
+          case this.eof(): return;
         }
       }
     }
@@ -289,7 +315,7 @@ class SyntaticalAnalyzer {
   }
 
   parseTypeStruct() {
-    if (this.consumeType()) {
+    if (this.consumeType(true)) {
       this.parseStructExpression();
     }
   }
@@ -305,6 +331,24 @@ class SyntaticalAnalyzer {
       this.parseStructExpression();
     } else if (this.consume(";")) {
       this.parseStructTermination();
+    } else {
+      this.handleError("Struct Type", this.currentLexeme, this.currentLine);
+      this.sync(this.followSets("typeStruct"));
+      switch (this.currentLexeme) {
+        case "var": this.parseVar(); break;
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case "}":
+          this.nextToken();
+          this.parseVar();
+          break;
+        case "real": this.parseTypeStruct(); break;
+        case "boolean": this.parseTypeStruct(); break;
+        case "int": this.parseTypeStruct(); break;
+        case "string": this.parseTypeStruct(); break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -313,6 +357,16 @@ class SyntaticalAnalyzer {
       return;
     } else if (this.checkType()) {
       this.parseTypeStruct();
+    } else {
+      this.handleError("Invalid Attribute", null, this.currentLine);
+      this.sync(this.followSets("struct"));
+      switch (this.currentLexeme) {
+        case "var": this.parseVar(); break;
+        case "function": this.parseGenerateFuncAndProc(); break;
+        case "procedure": this.parseGenerateFuncAndProc(); break;
+        case "start": this.parseGenerateFuncAndProc(); break;
+        case this.eof(): return;
+      }
     }
   }
 
@@ -325,7 +379,7 @@ class SyntaticalAnalyzer {
   }
 
   parseTypeVar() {
-    if (this.consumeType()) {
+    if (this.consumeType(true)) {
       this.parseVarExpression();
     }
   }
@@ -1066,6 +1120,10 @@ class SyntaticalAnalyzer {
       typeConst: {
         tokens: [],
         lexemes: ["typedef", "var", "function", "procedure", "start", 'boolean', '}', 'int', 'real', 'string']
+      },
+      struct: {
+        tokens: [],
+        lexemes: ["var", "function", "procedure", "start"]
       }
     };
     return sets[key];

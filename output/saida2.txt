@@ -5,13 +5,14 @@ Lista de Tokens:
 2 a Identifier
 2 2 Number
 2 ; Delimiter
+3 boolean Reserved Word
 3 b Identifier
-3 3 Number
+3 7 Number
 3 ; Delimiter
 4 } Delimiter
 6 typedef Reserved Word
 6 struct Reserved Word
-6 a Identifier
+6 o Identifier
 6 { Delimiter
 7 int Reserved Word
 7 b Identifier
