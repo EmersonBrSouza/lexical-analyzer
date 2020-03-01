@@ -13,7 +13,7 @@ class SyntaticalAnalyzer {
   }
 
   eof() {
-    return this.tokenPointer == this.tokens.length;
+    return this.tokenPointer + 1 == this.tokens.length;
   }
 
   check(lexeme, searchByType) {
@@ -98,7 +98,7 @@ class SyntaticalAnalyzer {
   }
 
   nextToken() {
-    if (this.tokenPointer + 1 > this.tokens.length) return;
+    if (this.tokenPointer + 1 >= this.tokens.length) return;
     this.tokenPointer++;
     this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
     this.currentToken = this.tokens[this.tokenPointer].token;
@@ -137,7 +137,7 @@ class SyntaticalAnalyzer {
 
   sync(followSet) {
     let found = false;
-    while (this.tokenPointer < this.tokens.length) {
+    while (!this.eof()) {
       if (
         followSet.tokens.includes(this.currentToken) ||
         followSet.lexemes.includes(this.currentLexeme)
@@ -157,6 +157,7 @@ class SyntaticalAnalyzer {
     this.parseStruct();
     this.parseVar();
     this.parseGenerateFuncAndProc();
+    this.parseStart();
     console.table(this.errors)
   }
 
@@ -774,7 +775,7 @@ class SyntaticalAnalyzer {
 
   parseArithmeticIdentifier() {
     if (this.matchFirstSet(this.currentLexeme, "scope")) {
-      if (this.consume("Identifier", true)) {
+      if (this.check("Identifier", true)) {
         this.parseIdentifierAccess();
         this.parseArithmeticExpression2();
       }
@@ -1049,7 +1050,9 @@ class SyntaticalAnalyzer {
       this.handleError("}", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("generateFuncAndProc"));
       switch (this.currentLexeme) {
-        case this.eof(): return;
+        case this.eof():
+          console.log("Fim do Arquivo");
+          return;
         default: this.parseGenerateFuncAndProc(); break;
       }
     }
@@ -1063,9 +1066,6 @@ class SyntaticalAnalyzer {
     ) {
       this.parseCommands();
       this.parseBody2();
-      // if (this.consume("}")) {
-      //   console.log("fechou func");
-      // }
     }
   }
 
@@ -1135,8 +1135,8 @@ class SyntaticalAnalyzer {
       return;
     } else if (
       this.matchFirstSet(this.currentLexeme, "arithmetic_expression") ||
-      this.consume("Number", true) ||
-      this.consume("Identifier", true)
+      this.check("Number", true) ||
+      this.check("Identifier", true)
     ) {
       this.parseArithmeticExpression();
       if (this.consume(";")) {
@@ -1394,12 +1394,33 @@ class SyntaticalAnalyzer {
         if (this.consume(")")) {
           if (this.consume("{")) {
             this.parseBody();
-            if (this.consume("}")) {
-              return;
+          } else {
+            this.handleError("{", this.currentLexeme,this.currentLine);
+            while(!this.eof()) {
+              this.nextToken();
             }
+            return;
           }
+        } else {
+          this.handleError(")", this.currentLexeme,this.currentLine);
+          while(!this.eof()) {
+            this.nextToken();
+          }
+          return;
         }
+      } else {
+        this.handleError("(", this.currentLexeme,this.currentLine);
+        while(!this.eof()) {
+          this.nextToken();
+        }
+        return;
       }
+    } else {
+      this.handleError("start", this.currentLexeme,this.currentLine);
+      while(!this.eof()) {
+        this.nextToken();
+      }
+      return;
     }
   }
 
@@ -1518,6 +1539,10 @@ class SyntaticalAnalyzer {
         lexemes: ["}", "start", "while", "if", "print", "read", "return"]
       },
       print: {
+        tokens: ["Identifier"],
+        lexemes: ["}", "start", "while", "if", "print", "read", "return"]
+      },
+      read: {
         tokens: ["Identifier"],
         lexemes: ["}", "start", "while", "if", "print", "read", "return"]
       }

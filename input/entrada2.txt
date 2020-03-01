@@ -24,7 +24,6 @@ function int a (int a, real b[][]) {
   
   print (aa,9);
   read (o,p);
-  o++;
 
   /*while (b == -2) {
   }*/
@@ -50,12 +49,12 @@ function int a (int a, real b[][]) {
 
   b++;
 
-  c = w--;
+  c = w--;*/
 
   print("a");
   read(c);
 
-  return a;*/
+  return (a + c);
 }
 
 procedure o (int p) {
