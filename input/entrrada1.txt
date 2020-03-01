@@ -1,9 +1,0 @@
-var oba * -10.8 _a zeb@ zeb_ o;
-amora++;
--- - 123;
-// 2;
-
-/* Este é um comentário ;
-  de múltiplas linhas
-  E tudo mais
-*/
