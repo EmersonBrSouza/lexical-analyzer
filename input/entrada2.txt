@@ -18,15 +18,19 @@ var {
 
 function int a (int a, real b[][]) {
 
-  /*var {
+  var { // Corrigir
     int b = c;
   }
   
-  while (b == -2) {
-    print(aa);
-  }
+  print (aa,9);
+  read (o,p);
+  o++;
 
-  if (c < d) then {
+  /*while (b == -2) {
+  }*/
+
+  
+  /*if (c < d) then {
 
   } else {
     print(d);
