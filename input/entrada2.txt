@@ -18,29 +18,32 @@ var {
 
 function int a (int a, real b[][]) {
 
-  var { // Corrigir
+  var {
     int b = c;
   }
   
-  print (aa,9);
-  read (o,p);
+  local.a;
+  print (aa);
+  read (pp,m);
 
-  /*while (b == -2) {
-  }*/
+  while (b == -2) {
+   op = 2;
+  }
 
   
-  /*if (c < d) then {
+  if (c < d) then {
 
   } else {
     print(d);
   }
 
-  if ("2" >= d) then {
+  if (c) then {
     
   } else {
     print(d);
   }
 
+/*
   if ("2" >= d || a == b) then {
     
   } else {
@@ -51,10 +54,10 @@ function int a (int a, real b[][]) {
 
   c = w--;*/
 
-  print("a");
-  read(c);
+  //print("a");
+  //read(c)
 
-  return (a + c);
+  return o;
 }
 
 procedure o (int p) {
