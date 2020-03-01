@@ -22,7 +22,7 @@ function int a (int a, real b[][]) {
     int b = c;
   }
   
-  local.a;
+  local.a(a, d , d);
   print (aa);
   read (pp,m);
 
@@ -31,8 +31,8 @@ function int a (int a, real b[][]) {
   }
 
   
-  if (c < d) then {
-
+  if (d) then {
+    c = c++;
   } else {
     print(d);
   }
@@ -43,27 +43,42 @@ function int a (int a, real b[][]) {
     print(d);
   }
 
-/*
-  if ("2" >= d || a == b) then {
-    
-  } else {
-    print(d);
-  }
+  print(d);
+  read(c);
 
-  b++;
-
-  c = w--;*/
-
-  //print("a");
-  //read(c)
-
-  return o;
+  return 5 + 2;
 }
 
 procedure o (int p) {
+  var {
+    int b = c;
+  }
+  
+  local.a(a, d , d);
+  print (aa);
 
+  print("a");
+  read(c);
+}
+
+function int opa (int a) {
+  return bem;
+}
+
+procedure ok (int b) {
+  if (d == e) then {
+    o = 0;
+  }
 }
 
 start () {
+  var {
+    int b[3];
+  }
+  
+  local.a(a, 2 , "d");
+  print (aa);
 
+  print("a");
+  read(c);
 }

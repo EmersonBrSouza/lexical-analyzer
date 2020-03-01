@@ -1544,9 +1544,9 @@ class SyntaticalAnalyzer {
     }
   }
   
-    /**
+  /**
    * Generate Function And Procedure
-   */
+  */
 
   parseGenerateFuncAndProc () {
     if (this.match('function')) {
@@ -1575,7 +1575,6 @@ class SyntaticalAnalyzer {
   }
 
   parseProcedure () {
-    console.log('abriu procedure')
     if (this.match('procedure')) {
       this.accept('procedure')
       if (this.match('Identifier', true)) {
