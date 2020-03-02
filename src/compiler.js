@@ -31,13 +31,13 @@ class Compiler {
 
         console.log(chalk.yellow(`\nAnalisando ${file.name}`));
         let result = lexicalAnalyzer.startAnalisis();
-        this._startSyntaticalAnalisys(result.tokens);
+        this._startSyntaticalAnalisys(result.tokens, file.name);
       }
     });
   }
 
-  _startSyntaticalAnalisys (tokens) {
-    const syntaticalAnalyzer = new SyntaticalAnalyzer(tokens);
+  _startSyntaticalAnalisys (tokens, filename) {
+    const syntaticalAnalyzer = new SyntaticalAnalyzer(tokens, filename);
     syntaticalAnalyzer.startAnalisys();
   }
 

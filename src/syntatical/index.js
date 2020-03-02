@@ -1,8 +1,11 @@
 const Definitions = require("./syntax_definitions");
+const fs = require('fs');
+const path = require('path');
 
 class SyntaticalAnalyzer {
-  constructor(tokens) {
+  constructor(tokens, filename) {
     this.tokens = tokens;
+    this.filename = filename;
     this.tokenPointer = 0;
     this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
     this.currentToken = this.tokens[this.tokenPointer].token;
@@ -130,7 +133,6 @@ class SyntaticalAnalyzer {
     console.log(
       `Esperava '${expected}' mas recebeu '${received}' na linha ${line}`
     );
-
     this.errors.push({ expected, received, line });
   }
 
@@ -163,6 +165,20 @@ class SyntaticalAnalyzer {
     } else {
       console.table(this.errors)
     }
+
+    this.writeFile();
+  }
+
+  writeFile () {
+    let filenumber = this.filename.split('entrada').join('').split('.txt')[0];
+    const logger = fs.createWriteStream(path.resolve("output", `saida${filenumber}.txt`), { flags: 'a' })
+    logger.write(`----------------------------------------------------------------------\n\n`)
+    logger.write(`\nLista de Erros Sintáticos:\n\n`)
+    this.errors.forEach(error => {
+      logger.write(`${error.line} ${error.expected} ${error.received}\n`)
+    });
+    logger.write(`----------------------------------------------------------------------\n\n`)
+    logger.end();
   }
 
   parseConst() {
@@ -444,6 +460,23 @@ class SyntaticalAnalyzer {
     } else if (this.consume("=")) {
       if (this.consumeValue()) {
         this.parseVarAttribuition();
+      } else {
+        this.handleError("Value to be assigned to variable", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("typeVar"));
+        switch (this.currentLexeme) {
+          case "function": this.parseGenerateFuncAndProc(); break;
+          case "procedure": this.parseGenerateFuncAndProc(); break;
+          case "start": this.parseGenerateFuncAndProc(); break;
+          case "}":
+            this.nextToken();
+            this.parseGenerateFuncAndProc();
+            break;
+          case "real": this.parseTypeVar(); break;
+          case "boolean": this.parseTypeVar(); break;
+          case "int": this.parseTypeVar(); break;
+          case "string": this.parseTypeVar(); break;
+          case this.eof(): return;
+        }
       }
     } else {
       this.handleError(", or ; or = or [", this.currentLexeme, this.currentLine);

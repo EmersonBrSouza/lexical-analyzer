@@ -1,0 +1,13 @@
+const {
+ int a;
+ string b 2;
+ boolean c 3;
+}
+
+var {
+ int c = 
+}
+
+start() {
+
+}

@@ -482,10 +482,12 @@ class LexicalAnalyzer {
     this.tokens.forEach(token => {
       logger.write(`${token.line} ${token.lexeme} ${token.token}\n`)
     });
-    logger.write(`\nLista de Erros:\n`)
+    logger.write(`----------------------------------------------------------------------\n\n`)
+    logger.write(`\nLista de Erros Léxicos:\n`)
     this.errors.forEach(error => {
       logger.write(`${error.line} ${error.lexeme} ${error.error}\n`)
     });
+    logger.write(`----------------------------------------------------------------------\n\n`)
     logger.end();
   }
 }
