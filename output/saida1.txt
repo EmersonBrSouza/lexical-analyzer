@@ -1,0 +1,30 @@
+Lista de Tokens:
+----------------------------------------------------------------------
+
+1 const Reserved Word
+1 { Delimiter
+2 int Reserved Word
+2 a Identifier
+2 3 Number
+2 ; Delimiter
+3 int Reserved Word
+3 b Identifier
+3 4 Number
+3 ; Delimiter
+4 real Reserved Word
+4 d Identifier
+4 9 Number
+4 ; Delimiter
+5 } Delimiter
+----------------------------------------------------------------------
+
+
+Lista de Erros Léxicos:
+----------------------------------------------------------------------
+
+
+Lista de Erros Sintáticos:
+
+5 start }
+----------------------------------------------------------------------
+

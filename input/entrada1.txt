@@ -1,0 +1,5 @@
+const {
+  int a 3;
+  int b 4;
+  real d 9;
+}

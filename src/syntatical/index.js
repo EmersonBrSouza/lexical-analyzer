@@ -3,9 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 class SyntaticalAnalyzer {
-  constructor(tokens, filename) {
+  constructor(tokens, filename, semantic) {
     this.tokens = tokens;
     this.filename = filename;
+    this.semantic = semantic;
     this.tokenPointer = 0;
     this.currentLexeme = this.tokens[this.tokenPointer].lexeme;
     this.currentToken = this.tokens[this.tokenPointer].token;
@@ -153,7 +154,7 @@ class SyntaticalAnalyzer {
   }
 
   startAnalisys() {
-    console.table(this.tokens)
+    // console.table(this.tokens)
     this.parseConst();
     this.parseStruct();
     this.parseVar();
@@ -201,8 +202,12 @@ class SyntaticalAnalyzer {
   }
 
   parseTypeConst() {
+    let currentType = null;
+    if (this.checkType(false)) {
+      currentType = this.currentLexeme;
+    }
     if (this.consumeType(false)) {
-      this.parseConstExpression();
+      this.parseConstExpression(currentType);
     } else {
       this.handleError("int, real, boolean or string", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("typeConst"));
@@ -225,9 +230,26 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseConstExpression() {
+  parseConstExpression(currentType) {
+    let data = { identifier: this.currentLexeme, value: null }
     if (this.consume("Identifier", true)) {
+      data.value = this.currentLexeme;
       if (this.consumeValue(this.currentLexeme)) {
+        if (data) {
+          let key = `global.${data.identifier}`;
+          if (!this.semantic.search(key)) {
+            this.semantic.insert(key, {
+              family: 'const',
+              token: 'Identifier',
+              lexeme: data.identifier,
+              type: currentType,
+              value: data.value,
+              line: this.currentLine
+            });
+          } else {
+            console.log("Já existe");
+          }
+        }
         this.parseConstContinuation();
       } else {
         this.handleError("Const value to be assigned", this.currentLexeme, this.currentLine);

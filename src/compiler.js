@@ -9,6 +9,7 @@ const chalk = require('chalk').default;
 
 const LexicalAnalyzer = require('./lexical');
 const SyntaticalAnalyzer = require('./syntatical');
+const SemanticAnalyzer = require('./semantic');
 const inputPath = path.resolve("input");
 const outputPath = path.resolve("output");
 const fileRegex = new RegExp(/entrada(\d+)(.txt)/, "g");
@@ -37,7 +38,7 @@ class Compiler {
   }
 
   _startSyntaticalAnalisys (tokens, filename) {
-    const syntaticalAnalyzer = new SyntaticalAnalyzer(tokens, filename);
+    const syntaticalAnalyzer = new SyntaticalAnalyzer(tokens, filename, new SemanticAnalyzer());
     syntaticalAnalyzer.startAnalisys();
   }
 
