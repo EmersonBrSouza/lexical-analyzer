@@ -3,6 +3,13 @@ class SemanticAnalyzer {
     this.table = new Map();
   }
 
+  insertIfNotExists (key, value) {
+    let shouldInsert = true;
+    if (shouldInsert) {
+      console.log(key, value);
+    }
+  }
+
   insert (key, value) {
     if (!this.table.has(key)) {
       this.table.set(key, value);

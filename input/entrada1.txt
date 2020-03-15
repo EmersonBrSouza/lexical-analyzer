@@ -3,3 +3,11 @@ const {
   int b 4;
   real d 9;
 }
+
+var {
+  int a = 2;
+  real ba[9];
+}
+start () {
+
+}

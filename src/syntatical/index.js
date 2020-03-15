@@ -235,21 +235,15 @@ class SyntaticalAnalyzer {
     if (this.consume("Identifier", true)) {
       data.value = this.currentLexeme;
       if (this.consumeValue(this.currentLexeme)) {
-        if (data) {
           let key = `global.${data.identifier}`;
-          if (!this.semantic.search(key)) {
-            this.semantic.insert(key, {
-              family: 'const',
-              token: 'Identifier',
-              lexeme: data.identifier,
-              type: currentType,
-              value: data.value,
-              line: this.currentLine
-            });
-          } else {
-            console.log("Já existe");
-          }
-        }
+          this.semantic.insertIfNotExists(key, {
+            family: 'const',
+            token: 'Identifier',
+            lexeme: data.identifier,
+            type: currentType,
+            value: data.value,
+            line: this.currentLine
+          });
         this.parseConstContinuation();
       } else {
         this.handleError("Const value to be assigned", this.currentLexeme, this.currentLine);
@@ -451,14 +445,22 @@ class SyntaticalAnalyzer {
   }
 
   parseTypeVar() {
+    let currentType = null;
+    if (this.checkType(false)) {
+      currentType = this.currentLexeme;
+    }
     if (this.consumeType(true)) {
-      this.parseVarExpression();
+      this.parseVarExpression(currentType);
     }
   }
 
-  parseVarExpression() {
+  parseVarExpression(currentType) {
+    let varName = null;
+    if (this.check("Identifier", true)) {
+      varName = this.currentLexeme;
+    }
     if (this.consume("Identifier", true)) {
-      this.parseVarContinuation();
+      this.parseVarContinuation(currentType, varName);
     } else {
       this.handleError("Identifier or int, boolean, string, real", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("var"));
@@ -472,15 +474,25 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVarContinuation() {
+  parseVarContinuation(currentType, varName) {
     if (this.consume(",")) {
       this.parseVarExpression();
     } else if (this.consume(";")) {
       this.parseVarTermination();
     } else if (this.check("[")) {
-      this.parseVector();
+      this.parseVector(currentType, varName);
     } else if (this.consume("=")) {
+      let value = this.checkValue() ? this.currentLexeme : null;
       if (this.consumeValue()) {
+        let key = `global.${varName}`;
+        this.semantic.insertIfNotExists(key, {
+          family: 'var',
+          token: 'Identifier',
+          lexeme: varName,
+          type: currentType,
+          value: value,
+          line: this.currentLine
+        });
         this.parseVarAttribuition();
       } else {
         this.handleError("Value to be assigned to variable", this.currentLexeme, this.currentLine);
@@ -563,11 +575,12 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVector() {
+  parseVector(currentType, varName) {
     if (this.consume("[")) {
+      let firstIndex = this.checkVectorIndex() ? this.currentLexeme : null;
       if (this.consumeVectorIndex()) {
         if (this.consume("]")) {
-          this.parseMatrix();
+          this.parseMatrix(currentType, varName, firstIndex);
         } else {
           this.handleError("]", this.currentLexeme, this.currentLine);
           this.sync(this.followSets("var"));
@@ -607,9 +620,20 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseMatrix() {
+  parseMatrix(currentType, varName, firstIndex) {
     if (this.consume("[")) {
+      let secondIndex = this.checkVectorIndex() ? this.currentLexeme : null;
       if (this.consumeVectorIndex()) {
+        let key = `global.${varName}`;
+        this.semantic.insertIfNotExists(key, {
+          family: 'var',
+          token: 'Identifier',
+          lexeme: varName,
+          type: currentType,
+          line: this.currentLine,
+          isArray: true,
+          arraySize: { firstIndex, secondIndex }
+        });
         if (this.consume("]")) {
           this.parseVarAttribuition();
         } else {
@@ -649,6 +673,16 @@ class SyntaticalAnalyzer {
         }
       }
     } else {
+      let key = `global.${varName}`;
+      this.semantic.insertIfNotExists(key, {
+        family: 'var',
+        token: 'Identifier',
+        lexeme: varName,
+        type: currentType,
+        line: this.currentLine,
+        isArray: true,
+        arraySize: { firstIndex }
+      });
       this.parseVarAttribuition();
     }
   }

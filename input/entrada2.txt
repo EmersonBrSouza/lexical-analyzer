@@ -11,7 +11,7 @@ typedef struct o {
 var {
   int c = 2;
   int a = 2;
-  int a[a];
+  int a[a][100];
   int b[c][2];
 }
 

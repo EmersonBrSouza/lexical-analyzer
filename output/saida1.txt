@@ -16,6 +16,25 @@ Lista de Tokens:
 4 9 Number
 4 ; Delimiter
 5 } Delimiter
+7 var Reserved Word
+7 { Delimiter
+8 int Reserved Word
+8 a Identifier
+8 = Attribuition Operator
+8 2 Number
+8 ; Delimiter
+9 real Reserved Word
+9 ba Identifier
+9 [ Delimiter
+9 9 Number
+9 ] Delimiter
+9 ; Delimiter
+10 } Delimiter
+11 start Reserved Word
+11 ( Delimiter
+11 ) Delimiter
+11 { Delimiter
+13 } Delimiter
 ----------------------------------------------------------------------
 
 
@@ -25,6 +44,5 @@ Lista de Erros Léxicos:
 
 Lista de Erros Sintáticos:
 
-5 start }
 ----------------------------------------------------------------------
 

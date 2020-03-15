@@ -40,6 +40,9 @@ Lista de Tokens:
 14 [ Delimiter
 14 a Identifier
 14 ] Delimiter
+14 [ Delimiter
+14 100 Number
+14 ] Delimiter
 14 ; Delimiter
 15 int Reserved Word
 15 b Identifier
