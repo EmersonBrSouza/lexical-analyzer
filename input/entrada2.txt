@@ -1,6 +1,7 @@
 const {
   int a 2;
-  boolean b 3;
+  boolean a true;
+  string c 2;
 }
 
 typedef struct o {
@@ -9,7 +10,7 @@ typedef struct o {
 }
 
 var {
-  int c = 2;
+  int c = 4;
   int a = 2;
   int a[a][100];
   int b[c][2];

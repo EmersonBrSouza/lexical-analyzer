@@ -166,8 +166,9 @@ class SyntaticalAnalyzer {
     } else {
       console.table(this.errors)
     }
-
+    
     this.writeFile();
+    this.semantic.showErrors();
   }
 
   writeFile () {
@@ -235,15 +236,31 @@ class SyntaticalAnalyzer {
     if (this.consume("Identifier", true)) {
       data.value = this.currentLexeme;
       if (this.consumeValue(this.currentLexeme)) {
-          let key = `global.${data.identifier}`;
-          this.semantic.insertIfNotExists(key, {
-            family: 'const',
-            token: 'Identifier',
-            lexeme: data.identifier,
-            type: currentType,
-            value: data.value,
-            line: this.currentLine
-          });
+          if (!this.semantic.has(data.identifier, 'global', ['const', 'var'])) {
+            if (this.semantic.checkType(currentType, data.value)) {
+              this.semantic.insertGlobal('const', data.identifier, {
+                family: 'const',
+                token: 'Identifier',
+                lexeme: data.identifier,
+                type: currentType,
+                value: data.value,
+                line: this.currentLine
+              })
+            } else {
+              this.semantic.appendError({
+                error: 'Invalid Type',
+                expected: currentType,
+                received: data.value,
+                line: this.currentLine
+              })
+            }
+          } else {
+            this.semantic.appendError({
+              error: 'Const or Var already exists in global scope',
+              received: data.identifier,
+              line: this.currentLine
+            })
+          }
         this.parseConstContinuation();
       } else {
         this.handleError("Const value to be assigned", this.currentLexeme, this.currentLine);
@@ -427,10 +444,10 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVar() {
+  parseVar(scope = 'global') {
     if (this.consume("var")) {
       if (this.consume("{")) {
-        this.parseTypeVar();
+        this.parseTypeVar(scope);
       } else {
         this.handleError("{", this.currentLexeme, this.currentLine);
         this.sync(this.followSets("var"));
@@ -444,23 +461,23 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseTypeVar() {
+  parseTypeVar(scope = 'global') {
     let currentType = null;
     if (this.checkType(false)) {
       currentType = this.currentLexeme;
     }
     if (this.consumeType(true)) {
-      this.parseVarExpression(currentType);
+      this.parseVarExpression(currentType, scope);
     }
   }
 
-  parseVarExpression(currentType) {
+  parseVarExpression(currentType, scope = 'global') {
     let varName = null;
     if (this.check("Identifier", true)) {
       varName = this.currentLexeme;
     }
     if (this.consume("Identifier", true)) {
-      this.parseVarContinuation(currentType, varName);
+      this.parseVarContinuation(currentType, varName, scope);
     } else {
       this.handleError("Identifier or int, boolean, string, real", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("var"));
@@ -474,25 +491,64 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVarContinuation(currentType, varName) {
+  parseVarContinuation(currentType, varName, scope = 'global') {
     if (this.consume(",")) {
       this.parseVarExpression();
     } else if (this.consume(";")) {
       this.parseVarTermination();
     } else if (this.check("[")) {
-      this.parseVector(currentType, varName);
+      this.parseVector(currentType, varName, scope);
     } else if (this.consume("=")) {
-      let value = this.checkValue() ? this.currentLexeme : null;
+      let value = this.checkValue() ? { lexeme: this.currentLexeme, token: this.currentToken } : null;
       if (this.consumeValue()) {
-        let key = `global.${varName}`;
-        this.semantic.insertIfNotExists(key, {
-          family: 'var',
-          token: 'Identifier',
-          lexeme: varName,
-          type: currentType,
-          value: value,
-          line: this.currentLine
-        });
+        if (scope == 'global') {
+          if (!this.semantic.has(varName, 'global', ['const', 'var'])) {
+            if (value.token == 'Identifier') {
+              if (this.semantic.has(value.lexeme, 'global', ['const', 'var'])) {
+                this.semantic.insertGlobal('var', varName, {
+                  family: 'var',
+                  token: 'Identifier',
+                  lexeme: varName,
+                  type: currentType,
+                  value: value.lexeme,
+                  line: this.currentLine
+                })
+              } else {
+                this.semantic.appendError({
+                  error: 'Undefined Variable or Const',
+                  expected: value.lexeme,
+                  line: this.currentLine
+                })
+              }
+            } else {
+              if (this.semantic.checkType(currentType, value.lexeme)) {
+                this.semantic.insertGlobal('var', varName, {
+                  family: 'var',
+                  token: 'Identifier',
+                  lexeme: varName,
+                  type: currentType,
+                  value: value.lexeme,
+                  line: this.currentLine
+                })
+              } else {
+                this.semantic.appendError({
+                  error: 'Invalid Type',
+                  expected: currentType,
+                  received: value.lexeme,
+                  line: this.currentLine
+                })
+              }
+            }
+          } else {
+            this.semantic.appendError({
+              error: 'Const or Var already exists in global scope',
+              received: varName,
+              line: this.currentLine
+            })
+          }
+        } else if (scope == "local") {
+          console.log("EITA BIXO, LOCALLL")
+        }
         this.parseVarAttribuition();
       } else {
         this.handleError("Value to be assigned to variable", this.currentLexeme, this.currentLine);
@@ -575,12 +631,12 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVector(currentType, varName) {
+  parseVector(currentType, varName, scope) {
     if (this.consume("[")) {
       let firstIndex = this.checkVectorIndex() ? this.currentLexeme : null;
       if (this.consumeVectorIndex()) {
         if (this.consume("]")) {
-          this.parseMatrix(currentType, varName, firstIndex);
+          this.parseMatrix(currentType, varName, firstIndex, scope);
         } else {
           this.handleError("]", this.currentLexeme, this.currentLine);
           this.sync(this.followSets("var"));
@@ -620,20 +676,31 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseMatrix(currentType, varName, firstIndex) {
+  parseMatrix(currentType, varName, firstIndex, scope) {
     if (this.consume("[")) {
       let secondIndex = this.checkVectorIndex() ? this.currentLexeme : null;
       if (this.consumeVectorIndex()) {
-        let key = `global.${varName}`;
-        this.semantic.insertIfNotExists(key, {
-          family: 'var',
-          token: 'Identifier',
-          lexeme: varName,
-          type: currentType,
-          line: this.currentLine,
-          isArray: true,
-          arraySize: { firstIndex, secondIndex }
-        });
+        if (scope == 'global') {
+          if (!this.semantic.has(varName, 'global', ['const', 'var'])) {
+            this.semantic.insertGlobal('var', varName, {
+              family: 'var',
+              token: 'Identifier',
+              lexeme: varName,
+              type: currentType,
+              line: this.currentLine,
+              isArray: true,
+              arraySize: { firstIndex, secondIndex }
+            })
+          } else {
+            this.semantic.appendError({
+              error: 'Const or Var already exists in global scope',
+              received: varName,
+              line: this.currentLine
+            })
+          }
+        } else if (scope == "local") {
+          console.log("EITA BIXO, MATRIX LOCALLL")
+        }
         if (this.consume("]")) {
           this.parseVarAttribuition();
         } else {
@@ -673,16 +740,27 @@ class SyntaticalAnalyzer {
         }
       }
     } else {
-      let key = `global.${varName}`;
-      this.semantic.insertIfNotExists(key, {
-        family: 'var',
-        token: 'Identifier',
-        lexeme: varName,
-        type: currentType,
-        line: this.currentLine,
-        isArray: true,
-        arraySize: { firstIndex }
-      });
+      if (scope == 'global') {
+        if (!this.semantic.has(varName, 'global', ['const', 'var'])) {
+          this.semantic.insertGlobal('var', varName, {
+            family: 'var',
+            token: 'Identifier',
+            lexeme: varName,
+            type: currentType,
+            line: this.currentLine,
+            isArray: true,
+            arraySize: { firstIndex }
+          })
+        } else {
+          this.semantic.appendError({
+            error: 'Const or Var already exists in global scope',
+            received: varName,
+            line: this.currentLine
+          })
+        }
+      } else if (scope == "local") {
+        console.log("EITA BIXO, ARRAY LOCALLL")
+      }
       this.parseVarAttribuition();
     }
   }
@@ -1151,7 +1229,7 @@ class SyntaticalAnalyzer {
 
   parseBody() {
     if (this.check("var")) {
-      this.parseVar();
+      this.parseVar("local");
     }
     this.parseBody2();
     if (this.consume("}")) {

@@ -1,10 +1,11 @@
 const {
   int a 3;
-  int b 4;
+  int a 4;
   real d 9;
 }
 
 var {
+  int da1, cas;
   int a = 2;
   real ba[9];
 }

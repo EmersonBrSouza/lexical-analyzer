@@ -8,7 +8,7 @@ Lista de Tokens:
 2 3 Number
 2 ; Delimiter
 3 int Reserved Word
-3 b Identifier
+3 a Identifier
 3 4 Number
 3 ; Delimiter
 4 real Reserved Word
@@ -19,22 +19,27 @@ Lista de Tokens:
 7 var Reserved Word
 7 { Delimiter
 8 int Reserved Word
-8 a Identifier
-8 = Attribuition Operator
-8 2 Number
+8 da1 Identifier
+8 , Delimiter
+8 cas Identifier
 8 ; Delimiter
-9 real Reserved Word
-9 ba Identifier
-9 [ Delimiter
-9 9 Number
-9 ] Delimiter
+9 int Reserved Word
+9 a Identifier
+9 = Attribuition Operator
+9 2 Number
 9 ; Delimiter
-10 } Delimiter
-11 start Reserved Word
-11 ( Delimiter
-11 ) Delimiter
-11 { Delimiter
-13 } Delimiter
+10 real Reserved Word
+10 ba Identifier
+10 [ Delimiter
+10 9 Number
+10 ] Delimiter
+10 ; Delimiter
+11 } Delimiter
+12 start Reserved Word
+12 ( Delimiter
+12 ) Delimiter
+12 { Delimiter
+14 } Delimiter
 ----------------------------------------------------------------------
 
 

@@ -1,43 +1,54 @@
 class SemanticAnalyzer {
   constructor () {
     this.table = new Map();
-  }
+    this.errors = [];
+    this.global = {
+      functions: new Map(),
+      const: new Map(),
+      var: new Map(),
+      struct: new Map()
+    }
 
-  insertIfNotExists (key, value) {
-    let shouldInsert = true;
-    if (shouldInsert) {
-      console.log(key, value);
+    this.local = {
+      var: new Map()
     }
   }
 
-  insert (key, value) {
-    if (!this.table.has(key)) {
-      this.table.set(key, value);
-      console.log(this.table)
-      return true;
+  checkType (type, value) {
+    switch (type) {
+      case 'int':
+        return Number.isInteger(parseInt(value))
+      case 'string':
+        let isString = parseInt(value) || value;
+        return typeof isString === 'string'
+      case 'real':
+        return parseFloat(value) % 1 === 0
+      case 'boolean':
+        return ['true', 'false'].includes(value)
+      default:
+        break;
     }
-    return false;
-  }
-  
-  replace (key, value) {
-    this.table.set(key, value);
   }
 
-  search (key, criteria = []) {
-    if (criteria) {
-      let found = false;
-      criteria.forEach(element => {
-        if (element == key) {
-          found = true;
-        }
-      });
-      return true
-    }
-    return this.table.get(key)
+  has (key, scope, filter = []) {
+    return filter.filter((el) => {
+      if (this[scope][el].has(key)) {
+        return this[scope][el].get(key)
+      }
+    }).length > 0;
   }
 
-  remove (key) {
-    this.table.delete(key)
+  insertGlobal (family, key, data) {
+    this.global[family].set(key, data)
+  }
+
+  appendError (error) {
+    this.errors.push(error)
+  }
+
+  showErrors () {
+    console.table(this.global.const)
+    console.table(this.errors)
   }
 }
 
