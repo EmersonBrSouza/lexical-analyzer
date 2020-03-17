@@ -1432,10 +1432,12 @@ class SyntaticalAnalyzer {
 
   parseFunction() {
     if (this.consume("function")) {
+      let data = { family: 'function', type: this.currentLexeme, identifier: null, args: [], line: this.currentLine }
       if (this.consumeType(true)) {
+        data.identifier = this.currentLexeme;
         if (this.consume("Identifier", true)) {
           if (this.consume("(")) {
-            this.parseParam();
+            this.parseParam(data);
           } else {
             this.handleError("(", this.currentLexeme, this.currentLine);
             this.sync(this.followSets("parameters"));
@@ -1504,9 +1506,11 @@ class SyntaticalAnalyzer {
 
   parseProcedure() {
     if (this.consume("procedure")) {
+      let data = { family: 'procedure', type: this.currentLexeme, identifier: null, args: [], line: this.currentLine }
+      data.identifier = this.currentLexeme;
       if (this.consume("Identifier", true)) {
         if (this.consume("(")) {
-          this.parseParam();
+          this.parseParam(data);
         } else {
           this.handleError("(", this.currentLexeme, this.currentLine);
           this.sync(this.followSets("parameters"));
@@ -1544,11 +1548,17 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseParam() {
+  parseParam(data) {
+    let currentArg = { type: this.currentLexeme, identifier: null };
     if (this.consumeType()) {
+      currentArg.identifier = this.currentLexeme;
       if (this.consume("Identifier", true)) {
-        this.parseParam2();
-        this.parseParam1();
+        let response = this.parseParam2();
+        if (response) {
+          currentArg.isArray = response.isArray,
+          currentArg.dimension = response.dimension
+        }
+        this.parseParam1(data, currentArg);
       } else {
         this.handleError("Identifier", this.currentLexeme, this.currentLine);
         this.sync(this.followSets("parameters"));
@@ -1589,11 +1599,21 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseParam1() {
+  parseParam1(data, currentArg) {
+    if (data.args.filter((el) => el.identifier === currentArg.identifier).length == 0) {
+      data.args.push(currentArg);
+    } else {
+      this.semantic.appendError({
+        error: "Attribute already exists in parameters list",
+        received: currentArg.identifier,
+        line: this.currentLine
+      })
+    }
+
     if (this.consume(",")) {
-      this.parseParam();
+      this.parseParam(data, currentArg);
     } else if (this.consume(")")) {
-      this.parseF2();
+      this.parseF2(data);
     } else {
       this.handleError(", or )", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("parameters"));
@@ -1617,7 +1637,11 @@ class SyntaticalAnalyzer {
   parseParam2() {
     if (this.consume("[")) {
       if (this.consume("]")) {
-        this.parseParam3();
+        if (this.parseParam3()) {
+          return { isArray: true, dimension: 2 }
+        } else {
+          return { isArray: true, dimension: 1 }
+        }
       } else {
         this.handleError("]", this.currentLexeme, this.currentLine);
         this.sync(this.followSets("parameters"));
@@ -1642,7 +1666,7 @@ class SyntaticalAnalyzer {
   parseParam3() {
     if (this.consume("[")) {
       if (this.consume("]")) {
-        return;
+        return true;
       } else {
         this.handleError("]", this.currentLexeme, this.currentLine);
         this.sync(this.followSets("parameters"));
@@ -1664,7 +1688,16 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseF2() {
+  parseF2(data) {
+    if (!this.semantic.has(data.identifier, 'global', ['function', 'procedure'])) {
+      this.semantic.insertGlobal(data.family, data.identifier, data)
+    } else {
+      this.semantic.appendError({
+        error: 'Function or Procedure already declared',
+        received: data.identifier,
+        line: this.currentLine
+      })
+    }
     if (this.consume("{")) {
       this.parseBody();
     } else {

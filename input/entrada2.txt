@@ -15,7 +15,6 @@ typedef struct o extends a{
 }
 
 
-
 var {
   int c = 4;
   int d = 2;
@@ -24,8 +23,7 @@ var {
 }
 
 
-function int a (int a, real b[][]) {
-
+function int a (int a, real o[][]) {
   var {
     int b = c;
   }
@@ -57,7 +55,7 @@ function int a (int a, real b[][]) {
   return 5 + 2;
 }
 
-procedure o (int p) {
+procedure a (int p) {
   var {
     int b = c;
   }

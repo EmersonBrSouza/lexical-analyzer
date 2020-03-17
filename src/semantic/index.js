@@ -3,7 +3,8 @@ class SemanticAnalyzer {
     this.table = new Map();
     this.errors = [];
     this.global = {
-      functions: new Map(),
+      function: new Map(),
+      procedure: new Map(),
       const: new Map(),
       var: new Map(),
       struct: new Map()
