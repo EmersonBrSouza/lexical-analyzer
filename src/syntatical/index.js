@@ -531,9 +531,75 @@ class SyntaticalAnalyzer {
 
   parseVarContinuation(currentType, varName, scope = 'global', functionName = "", parentFamily = "") {
     if (this.consume(",")) {
-      this.parseVarExpression();
+      if (scope == 'global') {
+        if (!this.semantic.has(varName, 'global', ['const', 'var'])) {
+          this.semantic.insertGlobal('var', varName, {
+            family: 'var',
+            token: 'Identifier',
+            lexeme: varName,
+            type: currentType,
+            line: this.currentLine
+          })
+        } else {
+          this.semantic.appendError({
+            error: 'Const or Var already exists in global scope',
+            received: varName,
+            line: this.currentLine
+          })
+        }
+      } else if (scope == "local") {
+        if (!this.semantic.hasLocal(parentFamily, functionName, varName)) {
+          this.semantic.insertLocal(parentFamily, functionName, varName, {
+            family: 'var',
+            token: 'Identifier',
+            lexeme: varName,
+            type: currentType,
+            line: this.currentLine
+          })
+        } else {
+          this.semantic.appendError({
+            error: 'Const or Var already exists in function scope',
+            received: varName,
+            line: this.currentLine
+          })
+        }
+      }
+      this.parseVarExpression(currentType, scope, functionName, parentFamily);
     } else if (this.consume(";")) {
-      this.parseVarTermination();
+      if (scope == 'global') {
+        if (!this.semantic.has(varName, 'global', ['const', 'var'])) {
+          this.semantic.insertGlobal('var', varName, {
+            family: 'var',
+            token: 'Identifier',
+            lexeme: varName,
+            type: currentType,
+            line: this.currentLine
+          })
+        } else {
+          this.semantic.appendError({
+            error: 'Const or Var already exists in global scope',
+            received: varName,
+            line: this.currentLine
+          })
+        }
+      } else if (scope == "local") {
+        if (!this.semantic.hasLocal(parentFamily, functionName, varName)) {
+          this.semantic.insertLocal(parentFamily, functionName, varName, {
+            family: 'var',
+            token: 'Identifier',
+            lexeme: varName,
+            type: currentType,
+            line: this.currentLine
+          })
+        } else {
+          this.semantic.appendError({
+            error: 'Const or Var already exists in function scope',
+            received: varName,
+            line: this.currentLine
+          })
+        }
+      }
+      this.parseVarTermination(scope, functionName, parentFamily, currentType, varName);
     } else if (this.check("[")) {
       this.parseVector(currentType, varName, scope, functionName, parentFamily);
     } else if (this.consume("=")) {
@@ -602,7 +668,7 @@ class SyntaticalAnalyzer {
             })
           }
         }
-        this.parseVarAttribuition();
+        this.parseVarAttribuition(scope, functionName, parentFamily, currentType, varName);
       } else {
         this.handleError("Value to be assigned to variable", this.currentLexeme, this.currentLine);
         this.sync(this.followSets("typeVar"));
@@ -641,11 +707,11 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVarAttribuition() {
+  parseVarAttribuition(scope, functionName, parentFamily) {
     if (this.consume(",")) {
-      this.parseVarExpression();
+      this.parseVarExpression(scope, functionName, parentFamily);
     } else if (this.consume(";")) {
-      this.parseVarTermination();
+      this.parseVarTermination(scope, functionName, parentFamily);
     } else {
       this.handleError(", or ;", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("typeVar"));
@@ -666,11 +732,11 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVarTermination() {
+  parseVarTermination(scope, functionName, parentFamily) {
     if (this.consume("}")) {
       return;
     } else if (this.checkType(true)) {
-      this.parseTypeVar();
+      this.parseTypeVar(scope, functionName, parentFamily);
       return;
     } else {
       this.handleError("}", this.currentLexeme, this.currentLine);

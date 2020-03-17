@@ -261,40 +261,50 @@ Lista de Tokens:
 80 { Delimiter
 81 var Reserved Word
 81 { Delimiter
-82 int Reserved Word
-82 b Identifier
-82 [ Delimiter
-82 3 Number
-82 ] Delimiter
+82 real Reserved Word
+82 e Identifier
+82 , Delimiter
+82 d Identifier
 82 ; Delimiter
-83 } Delimiter
-85 local Reserved Word
-85 . Delimiter
-85 a Identifier
-85 ( Delimiter
-85 a Identifier
-85 , Delimiter
-85 2 Number
-85 , Delimiter
-85 "d" String
-85 ) Delimiter
-85 ; Delimiter
-86 print Reserved Word
-86 ( Delimiter
-86 aa Identifier
-86 ) Delimiter
-86 ; Delimiter
+83 int Reserved Word
+83 j Identifier
+83 = Attribuition Operator
+83 2 Number
+83 ; Delimiter
+84 int Reserved Word
+84 b Identifier
+84 [ Delimiter
+84 3 Number
+84 ] Delimiter
+84 ; Delimiter
+85 } Delimiter
+87 local Reserved Word
+87 . Delimiter
+87 a Identifier
+87 ( Delimiter
+87 a Identifier
+87 , Delimiter
+87 2 Number
+87 , Delimiter
+87 "d" String
+87 ) Delimiter
+87 ; Delimiter
 88 print Reserved Word
 88 ( Delimiter
-88 "a" String
+88 aa Identifier
 88 ) Delimiter
 88 ; Delimiter
-89 read Reserved Word
-89 ( Delimiter
-89 c Identifier
-89 ) Delimiter
-89 ; Delimiter
-90 } Delimiter
+90 print Reserved Word
+90 ( Delimiter
+90 "a" String
+90 ) Delimiter
+90 ; Delimiter
+91 read Reserved Word
+91 ( Delimiter
+91 c Identifier
+91 ) Delimiter
+91 ; Delimiter
+92 } Delimiter
 ----------------------------------------------------------------------
 
 

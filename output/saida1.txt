@@ -1,6 +1,6 @@
+Lista de Tokens:
 ----------------------------------------------------------------------
 
-Lista de Tokens:
 
 Lista de Erros Sintáticos:
 

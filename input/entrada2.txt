@@ -79,6 +79,8 @@ procedure ok (int b) {
 
 start () {
   var {
+    real e, d;
+    int j = 2;
     int b[3];
   }
   
