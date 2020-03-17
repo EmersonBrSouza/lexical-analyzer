@@ -1,7 +1,7 @@
 const {
   int a 2;
   boolean d true;
-  string c 2;
+  real c 3;
 }
 
 typedef struct a{

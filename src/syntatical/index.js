@@ -535,7 +535,7 @@ class SyntaticalAnalyzer {
     } else if (this.consume(";")) {
       this.parseVarTermination();
     } else if (this.check("[")) {
-      this.parseVector(currentType, varName, scope);
+      this.parseVector(currentType, varName, scope, functionName, parentFamily);
     } else if (this.consume("=")) {
       let value = this.checkValue() ? { lexeme: this.currentLexeme, token: this.currentToken } : null;
       if (this.consumeValue()) {
@@ -684,12 +684,12 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVector(currentType, varName, scope) {
+  parseVector(currentType, varName, scope, functionName = "", parentFamily = "") {
     if (this.consume("[")) {
       let firstIndex = this.checkVectorIndex() ? this.currentLexeme : null;
       if (this.consumeVectorIndex()) {
         if (this.consume("]")) {
-          this.parseMatrix(currentType, varName, firstIndex, scope);
+          this.parseMatrix(currentType, varName, firstIndex, scope, functionName, parentFamily);
         } else {
           this.handleError("]", this.currentLexeme, this.currentLine);
           this.sync(this.followSets("var"));
@@ -729,7 +729,7 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseMatrix(currentType, varName, firstIndex, scope) {
+  parseMatrix(currentType, varName, firstIndex, scope, functionName = "", parentFamily = "") {
     if (this.consume("[")) {
       let secondIndex = this.checkVectorIndex() ? this.currentLexeme : null;
       if (this.consumeVectorIndex()) {
@@ -753,6 +753,23 @@ class SyntaticalAnalyzer {
           }
         } else if (scope == "local") {
           console.log("EITA BIXO, MATRIX LOCALLL")
+          if (!this.semantic.hasLocal(parentFamily, functionName, varName)) {
+            this.semantic.insertLocal(parentFamily, functionName, varName, {
+              family: 'var',
+              token: 'Identifier',
+              lexeme: varName,
+              type: currentType,
+              line: this.currentLine,
+              isArray: true,
+              arraySize: { firstIndex, secondIndex }
+            })
+          } else {
+            this.semantic.appendError({
+              error: 'Const or Var already exists in function scope',
+              received: varName,
+              line: this.currentLine
+            })
+          }
         }
         if (this.consume("]")) {
           this.parseVarAttribuition();
@@ -813,6 +830,23 @@ class SyntaticalAnalyzer {
         }
       } else if (scope == "local") {
         console.log("EITA BIXO, ARRAY LOCALLL")
+        if (!this.semantic.hasLocal(parentFamily, functionName, varName)) {
+          this.semantic.insertLocal(parentFamily, functionName, varName, {
+            family: 'var',
+            token: 'Identifier',
+            lexeme: varName,
+            type: currentType,
+            line: this.currentLine,
+            isArray: true,
+            arraySize: { firstIndex }
+          })
+        } else {
+          this.semantic.appendError({
+            error: 'Const or Var already exists in function scope',
+            received: varName,
+            line: this.currentLine
+          })
+        }
       }
       this.parseVarAttribuition();
     }
@@ -1730,7 +1764,7 @@ class SyntaticalAnalyzer {
       if (this.consume("(")) {
         if (this.consume(")")) {
           if (this.consume("{")) {
-            this.parseBody();
+            this.parseBody('start', 'start');
           } else {
             this.handleError("{", this.currentLexeme,this.currentLine);
             while(!this.eof()) {

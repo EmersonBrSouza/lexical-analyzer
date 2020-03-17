@@ -11,9 +11,9 @@ Lista de Tokens:
 3 d Identifier
 3 true Reserved Word
 3 ; Delimiter
-4 string Reserved Word
+4 real Reserved Word
 4 c Identifier
-4 2 Number
+4 3 Number
 4 ; Delimiter
 5 } Delimiter
 7 typedef Reserved Word

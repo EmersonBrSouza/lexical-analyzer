@@ -7,11 +7,11 @@ class SemanticAnalyzer {
       procedure: new Map(),
       const: new Map(),
       var: new Map(),
-      struct: new Map()
-    }
-
-    this.local = {
-      var: new Map()
+      struct: new Map(),
+      start: {
+        args: [],
+        context: new Map()
+      }
     }
   }
 
@@ -40,7 +40,7 @@ class SemanticAnalyzer {
   }
 
   hasLocal (family, scopeId, key) {
-    let selector = this.global[family].get(scopeId);
+    let selector = (family == 'start') ? this.global[family]: this.global[family].get(scopeId);
 
     if (selector) {
       let findParameters = selector.args.filter((el) => {
@@ -58,12 +58,15 @@ class SemanticAnalyzer {
   }
 
   insertLocal (family, scopeId, key, data) {
-    console.log(this.global[family].get(scopeId))
-    // this.global[family].get(scopeId).context.set(key, data)
+    if (family == 'start') {
+      this.global[family].context.set(key, data)
+    } else {
+      this.global[family].get(scopeId).context.set(key, data)
+    }
   }
 
   insertGlobal (family, key, data) {
-    if (['procedure', 'function', 'start'].includes(family)) {
+    if (['procedure', 'function'].includes(family)) {
       data = {...data, context: new Map() }
     }
     this.global[family].set(key, data)
@@ -74,7 +77,7 @@ class SemanticAnalyzer {
   }
 
   showErrors () {
-    console.log(this.global.procedure)
+    console.log(this.global.start.context)
     console.table(this.errors)
   }
 }
