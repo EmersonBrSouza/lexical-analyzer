@@ -19,6 +19,8 @@ Lista de Tokens:
 7 typedef Reserved Word
 7 struct Reserved Word
 7 o Identifier
+7 extends Reserved Word
+7 b Identifier
 7 { Delimiter
 8 int Reserved Word
 8 b Identifier
@@ -27,261 +29,272 @@ Lista de Tokens:
 9 a Identifier
 9 ; Delimiter
 10 } Delimiter
-12 var Reserved Word
+12 typedef Reserved Word
+12 struct Reserved Word
+12 a Identifier
 12 { Delimiter
 13 int Reserved Word
-13 c Identifier
-13 = Attribuition Operator
-13 4 Number
+13 b Identifier
 13 ; Delimiter
 14 int Reserved Word
 14 a Identifier
-14 = Attribuition Operator
-14 2 Number
 14 ; Delimiter
-15 int Reserved Word
-15 a Identifier
-15 [ Delimiter
-15 a Identifier
-15 ] Delimiter
-15 [ Delimiter
-15 100 Number
-15 ] Delimiter
-15 ; Delimiter
-16 int Reserved Word
-16 b Identifier
-16 [ Delimiter
-16 c Identifier
-16 ] Delimiter
-16 [ Delimiter
-16 2 Number
-16 ] Delimiter
-16 ; Delimiter
-17 } Delimiter
-20 function Reserved Word
+15 } Delimiter
+17 var Reserved Word
+17 { Delimiter
+18 int Reserved Word
+18 c Identifier
+18 = Attribuition Operator
+18 4 Number
+18 ; Delimiter
+19 int Reserved Word
+19 d Identifier
+19 = Attribuition Operator
+19 2 Number
+19 ; Delimiter
 20 int Reserved Word
-20 a Identifier
-20 ( Delimiter
-20 int Reserved Word
-20 a Identifier
-20 , Delimiter
-20 real Reserved Word
-20 b Identifier
+20 c Identifier
 20 [ Delimiter
+20 a Identifier
 20 ] Delimiter
 20 [ Delimiter
+20 100 Number
 20 ] Delimiter
-20 ) Delimiter
-20 { Delimiter
-22 var Reserved Word
-22 { Delimiter
-23 int Reserved Word
-23 b Identifier
-23 = Attribuition Operator
-23 c Identifier
-23 ; Delimiter
-24 } Delimiter
-26 local Reserved Word
-26 . Delimiter
-26 a Identifier
-26 ( Delimiter
-26 a Identifier
-26 , Delimiter
-26 d Identifier
-26 , Delimiter
-26 d Identifier
-26 ) Delimiter
-26 ; Delimiter
-27 print Reserved Word
-27 ( Delimiter
-27 aa Identifier
-27 ) Delimiter
-27 ; Delimiter
-28 read Reserved Word
-28 ( Delimiter
-28 pp Identifier
-28 , Delimiter
-28 m Identifier
-28 ) Delimiter
+20 ; Delimiter
+21 int Reserved Word
+21 b Identifier
+21 [ Delimiter
+21 c Identifier
+21 ] Delimiter
+21 [ Delimiter
+21 2 Number
+21 ] Delimiter
+21 ; Delimiter
+22 } Delimiter
+25 function Reserved Word
+25 int Reserved Word
+25 a Identifier
+25 ( Delimiter
+25 int Reserved Word
+25 a Identifier
+25 , Delimiter
+25 real Reserved Word
+25 b Identifier
+25 [ Delimiter
+25 ] Delimiter
+25 [ Delimiter
+25 ] Delimiter
+25 ) Delimiter
+25 { Delimiter
+27 var Reserved Word
+27 { Delimiter
+28 int Reserved Word
+28 b Identifier
+28 = Attribuition Operator
+28 c Identifier
 28 ; Delimiter
-30 while Reserved Word
-30 ( Delimiter
-30 b Identifier
-30 == Relational Operator
-30 -2 Number
-30 ) Delimiter
-30 { Delimiter
-31 op Identifier
-31 = Attribuition Operator
-31 2 Number
+29 } Delimiter
+31 local Reserved Word
+31 . Delimiter
+31 a Identifier
+31 ( Delimiter
+31 a Identifier
+31 , Delimiter
+31 d Identifier
+31 , Delimiter
+31 d Identifier
+31 ) Delimiter
 31 ; Delimiter
-32 } Delimiter
-35 if Reserved Word
+32 print Reserved Word
+32 ( Delimiter
+32 aa Identifier
+32 ) Delimiter
+32 ; Delimiter
+33 read Reserved Word
+33 ( Delimiter
+33 pp Identifier
+33 , Delimiter
+33 m Identifier
+33 ) Delimiter
+33 ; Delimiter
+35 while Reserved Word
 35 ( Delimiter
-35 d Identifier
+35 b Identifier
+35 == Relational Operator
+35 -2 Number
 35 ) Delimiter
-35 then Reserved Word
 35 { Delimiter
-36 c Identifier
+36 op Identifier
 36 = Attribuition Operator
-36 c Identifier
-36 ++ Arithmetic Increment Operator
+36 2 Number
 36 ; Delimiter
 37 } Delimiter
-37 else Reserved Word
-37 { Delimiter
-38 print Reserved Word
-38 ( Delimiter
-38 d Identifier
-38 ) Delimiter
-38 ; Delimiter
-39 } Delimiter
-41 if Reserved Word
-41 ( Delimiter
+40 if Reserved Word
+40 ( Delimiter
+40 d Identifier
+40 ) Delimiter
+40 then Reserved Word
+40 { Delimiter
 41 c Identifier
-41 ) Delimiter
-41 then Reserved Word
-41 { Delimiter
-43 } Delimiter
-43 else Reserved Word
-43 { Delimiter
-44 print Reserved Word
-44 ( Delimiter
-44 d Identifier
-44 ) Delimiter
-44 ; Delimiter
-45 } Delimiter
-47 print Reserved Word
-47 ( Delimiter
-47 d Identifier
-47 ) Delimiter
-47 ; Delimiter
-48 read Reserved Word
-48 ( Delimiter
-48 c Identifier
-48 ) Delimiter
-48 ; Delimiter
-50 return Reserved Word
-50 5 Number
-50 + Arithmetic Operator
-50 2 Number
-50 ; Delimiter
-51 } Delimiter
-53 procedure Reserved Word
-53 o Identifier
+41 = Attribuition Operator
+41 c Identifier
+41 ++ Arithmetic Increment Operator
+41 ; Delimiter
+42 } Delimiter
+42 else Reserved Word
+42 { Delimiter
+43 print Reserved Word
+43 ( Delimiter
+43 d Identifier
+43 ) Delimiter
+43 ; Delimiter
+44 } Delimiter
+46 if Reserved Word
+46 ( Delimiter
+46 c Identifier
+46 ) Delimiter
+46 then Reserved Word
+46 { Delimiter
+48 } Delimiter
+48 else Reserved Word
+48 { Delimiter
+49 print Reserved Word
+49 ( Delimiter
+49 d Identifier
+49 ) Delimiter
+49 ; Delimiter
+50 } Delimiter
+52 print Reserved Word
+52 ( Delimiter
+52 d Identifier
+52 ) Delimiter
+52 ; Delimiter
+53 read Reserved Word
 53 ( Delimiter
-53 int Reserved Word
-53 p Identifier
+53 c Identifier
 53 ) Delimiter
-53 { Delimiter
-54 var Reserved Word
-54 { Delimiter
-55 int Reserved Word
-55 b Identifier
-55 = Attribuition Operator
-55 c Identifier
+53 ; Delimiter
+55 return Reserved Word
+55 5 Number
+55 + Arithmetic Operator
+55 2 Number
 55 ; Delimiter
 56 } Delimiter
-58 local Reserved Word
-58 . Delimiter
-58 a Identifier
+58 procedure Reserved Word
+58 o Identifier
 58 ( Delimiter
-58 a Identifier
-58 , Delimiter
-58 d Identifier
-58 , Delimiter
-58 d Identifier
+58 int Reserved Word
+58 p Identifier
 58 ) Delimiter
-58 ; Delimiter
-59 print Reserved Word
-59 ( Delimiter
-59 aa Identifier
-59 ) Delimiter
-59 ; Delimiter
-61 print Reserved Word
-61 ( Delimiter
-61 "a" String
-61 ) Delimiter
-61 ; Delimiter
-62 read Reserved Word
-62 ( Delimiter
-62 c Identifier
-62 ) Delimiter
-62 ; Delimiter
-63 } Delimiter
-65 function Reserved Word
-65 int Reserved Word
-65 opa Identifier
-65 ( Delimiter
-65 int Reserved Word
-65 a Identifier
-65 ) Delimiter
-65 { Delimiter
-66 return Reserved Word
-66 bem Identifier
+58 { Delimiter
+59 var Reserved Word
+59 { Delimiter
+60 int Reserved Word
+60 b Identifier
+60 = Attribuition Operator
+60 c Identifier
+60 ; Delimiter
+61 } Delimiter
+63 local Reserved Word
+63 . Delimiter
+63 a Identifier
+63 ( Delimiter
+63 a Identifier
+63 , Delimiter
+63 d Identifier
+63 , Delimiter
+63 d Identifier
+63 ) Delimiter
+63 ; Delimiter
+64 print Reserved Word
+64 ( Delimiter
+64 aa Identifier
+64 ) Delimiter
+64 ; Delimiter
+66 print Reserved Word
+66 ( Delimiter
+66 "a" String
+66 ) Delimiter
 66 ; Delimiter
-67 } Delimiter
-69 procedure Reserved Word
-69 ok Identifier
-69 ( Delimiter
-69 int Reserved Word
-69 b Identifier
-69 ) Delimiter
-69 { Delimiter
-70 if Reserved Word
+67 read Reserved Word
+67 ( Delimiter
+67 c Identifier
+67 ) Delimiter
+67 ; Delimiter
+68 } Delimiter
+70 function Reserved Word
+70 int Reserved Word
+70 opa Identifier
 70 ( Delimiter
-70 d Identifier
-70 == Relational Operator
-70 e Identifier
+70 int Reserved Word
+70 a Identifier
 70 ) Delimiter
-70 then Reserved Word
 70 { Delimiter
-71 o Identifier
-71 = Attribuition Operator
-71 0 Number
+71 return Reserved Word
+71 bem Identifier
 71 ; Delimiter
 72 } Delimiter
-73 } Delimiter
-75 start Reserved Word
+74 procedure Reserved Word
+74 ok Identifier
+74 ( Delimiter
+74 int Reserved Word
+74 b Identifier
+74 ) Delimiter
+74 { Delimiter
+75 if Reserved Word
 75 ( Delimiter
+75 d Identifier
+75 == Relational Operator
+75 e Identifier
 75 ) Delimiter
+75 then Reserved Word
 75 { Delimiter
-76 var Reserved Word
-76 { Delimiter
-77 int Reserved Word
-77 b Identifier
-77 [ Delimiter
-77 3 Number
-77 ] Delimiter
-77 ; Delimiter
+76 o Identifier
+76 = Attribuition Operator
+76 0 Number
+76 ; Delimiter
+77 } Delimiter
 78 } Delimiter
-80 local Reserved Word
-80 . Delimiter
-80 a Identifier
+80 start Reserved Word
 80 ( Delimiter
-80 a Identifier
-80 , Delimiter
-80 2 Number
-80 , Delimiter
-80 "d" String
 80 ) Delimiter
-80 ; Delimiter
-81 print Reserved Word
-81 ( Delimiter
-81 aa Identifier
-81 ) Delimiter
-81 ; Delimiter
-83 print Reserved Word
-83 ( Delimiter
-83 "a" String
-83 ) Delimiter
-83 ; Delimiter
-84 read Reserved Word
-84 ( Delimiter
-84 c Identifier
-84 ) Delimiter
-84 ; Delimiter
-85 } Delimiter
+80 { Delimiter
+81 var Reserved Word
+81 { Delimiter
+82 int Reserved Word
+82 b Identifier
+82 [ Delimiter
+82 3 Number
+82 ] Delimiter
+82 ; Delimiter
+83 } Delimiter
+85 local Reserved Word
+85 . Delimiter
+85 a Identifier
+85 ( Delimiter
+85 a Identifier
+85 , Delimiter
+85 2 Number
+85 , Delimiter
+85 "d" String
+85 ) Delimiter
+85 ; Delimiter
+86 print Reserved Word
+86 ( Delimiter
+86 aa Identifier
+86 ) Delimiter
+86 ; Delimiter
+88 print Reserved Word
+88 ( Delimiter
+88 "a" String
+88 ) Delimiter
+88 ; Delimiter
+89 read Reserved Word
+89 ( Delimiter
+89 c Identifier
+89 ) Delimiter
+89 ; Delimiter
+90 } Delimiter
 ----------------------------------------------------------------------
 
 

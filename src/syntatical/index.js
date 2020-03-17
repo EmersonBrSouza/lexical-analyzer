@@ -330,8 +330,9 @@ class SyntaticalAnalyzer {
   parseStruct() {
     if (this.consume("typedef")) {
       if (this.consume("struct")) {
+        let data = { identifier: this.currentLexeme }
         if (this.consume("Identifier", true)) {
-          this.parseStructExtends();
+          this.parseStructExtends(data);
         } else {
           this.handleError("Identifier", this.currentLexeme, this.currentLine);
           this.sync(this.followSets("struct"));
@@ -357,17 +358,32 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseStructExtends() {
+  parseStructExtends(data) {
     if (this.consume("extends")) {
-      if (this.consume("{")) {
-        this.parseTypeStruct();
+      data.extends = this.currentLexeme;
+      if (this.consume("Identifier", true)) {
+        if (this.consume("{")) {
+          this.parseTypeStruct(data);
+        }
+      } else {
+        this.handleError("extends or {", this.currentLexeme, this.currentLine);
+        this.sync(this.followSets("struct"));
+        switch (this.currentLexeme) {
+          case "typedef": this.parseStruct(); break;
+          case "var": this.parseVar(); break;
+          case "function": this.parseGenerateFuncAndProc(); break;
+          case "procedure": this.parseGenerateFuncAndProc(); break;
+          case "start": this.parseGenerateFuncAndProc(); break;
+          case this.eof(): return;
+        }
       }
     } else if (this.consume("{")) {
-      this.parseTypeStruct();
+      this.parseTypeStruct(data);
     } else {
       this.handleError("extends or {", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("struct"));
       switch (this.currentLexeme) {
+        case "typedef": this.parseStruct(); break;
         case "var": this.parseVar(); break;
         case "function": this.parseGenerateFuncAndProc(); break;
         case "procedure": this.parseGenerateFuncAndProc(); break;
@@ -427,6 +443,7 @@ class SyntaticalAnalyzer {
 
   parseStructTermination() {
     if (this.consume("}")) {
+      this.parseStruct();
       return;
     } else if (this.checkType()) {
       this.parseTypeStruct();
