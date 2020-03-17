@@ -1,25 +1,25 @@
 const {
   int a 2;
-  boolean a true;
+  boolean d true;
   string c 2;
 }
 
 typedef struct a{
-  int b;
-  int a;
+  int b1;
+  int a2;
 }
 
 typedef struct o extends a{
   int b;
-  int c;
+  int cc;
 }
 
 
 var {
-  int c = 4;
-  int d = 2;
-  int c[a][100];
-  int b[c][2];
+  int cd = 4;
+  int df = 2;
+  int cad[a][100];
+  int bf[c][2];
 }
 
 
@@ -55,7 +55,7 @@ function int a (int a, real o[][]) {
   return 5 + 2;
 }
 
-procedure a (int p) {
+procedure c (int p) {
   var {
     int b = c;
   }

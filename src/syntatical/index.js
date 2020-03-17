@@ -482,10 +482,10 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVar(scope = 'global') {
+  parseVar(scope = 'global', functionName = "", parentFamily = "") {
     if (this.consume("var")) {
       if (this.consume("{")) {
-        this.parseTypeVar(scope);
+        this.parseTypeVar(scope, functionName, parentFamily);
       } else {
         this.handleError("{", this.currentLexeme, this.currentLine);
         this.sync(this.followSets("var"));
@@ -499,23 +499,23 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseTypeVar(scope = 'global') {
+  parseTypeVar(scope = 'global', functionName = "", parentFamily = "") {
     let currentType = null;
     if (this.checkType(false)) {
       currentType = this.currentLexeme;
     }
     if (this.consumeType(true)) {
-      this.parseVarExpression(currentType, scope);
+      this.parseVarExpression(currentType, scope, functionName, parentFamily);
     }
   }
 
-  parseVarExpression(currentType, scope = 'global') {
+  parseVarExpression(currentType, scope = 'global', functionName = "", parentFamily = "") {
     let varName = null;
     if (this.check("Identifier", true)) {
       varName = this.currentLexeme;
     }
     if (this.consume("Identifier", true)) {
-      this.parseVarContinuation(currentType, varName, scope);
+      this.parseVarContinuation(currentType, varName, scope, functionName, parentFamily);
     } else {
       this.handleError("Identifier or int, boolean, string, real", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("var"));
@@ -529,7 +529,7 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseVarContinuation(currentType, varName, scope = 'global') {
+  parseVarContinuation(currentType, varName, scope = 'global', functionName = "", parentFamily = "") {
     if (this.consume(",")) {
       this.parseVarExpression();
     } else if (this.consume(";")) {
@@ -585,7 +585,22 @@ class SyntaticalAnalyzer {
             })
           }
         } else if (scope == "local") {
-          console.log("EITA BIXO, LOCALLL")
+          if (!this.semantic.hasLocal(parentFamily, functionName, varName)) {
+            this.semantic.insertLocal(parentFamily, functionName, varName, {
+              family: 'var',
+              token: 'Identifier',
+              lexeme: varName,
+              type: currentType,
+              value: value.lexeme,
+              line: this.currentLine
+            })
+          } else {
+            this.semantic.appendError({
+              error: 'Const or Var already exists in function scope',
+              received: varName,
+              line: this.currentLine
+            })
+          }
         }
         this.parseVarAttribuition();
       } else {
@@ -1265,9 +1280,9 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseBody() {
+  parseBody(functionName = "", parentFamily = "") {
     if (this.check("var")) {
-      this.parseVar("local");
+      this.parseVar("local", functionName, parentFamily);
     }
     this.parseBody2();
     if (this.consume("}")) {
@@ -1699,7 +1714,7 @@ class SyntaticalAnalyzer {
       })
     }
     if (this.consume("{")) {
-      this.parseBody();
+      this.parseBody(data.identifier, data.family);
     } else {
       this.handleError("{", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("functionBody"));

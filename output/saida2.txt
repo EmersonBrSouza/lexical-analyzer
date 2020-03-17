@@ -8,7 +8,7 @@ Lista de Tokens:
 2 2 Number
 2 ; Delimiter
 3 boolean Reserved Word
-3 a Identifier
+3 d Identifier
 3 true Reserved Word
 3 ; Delimiter
 4 string Reserved Word
@@ -21,10 +21,10 @@ Lista de Tokens:
 7 a Identifier
 7 { Delimiter
 8 int Reserved Word
-8 b Identifier
+8 b1 Identifier
 8 ; Delimiter
 9 int Reserved Word
-9 a Identifier
+9 a2 Identifier
 9 ; Delimiter
 10 } Delimiter
 12 typedef Reserved Word
@@ -37,23 +37,23 @@ Lista de Tokens:
 13 b Identifier
 13 ; Delimiter
 14 int Reserved Word
-14 c Identifier
+14 cc Identifier
 14 ; Delimiter
 15 } Delimiter
 18 var Reserved Word
 18 { Delimiter
 19 int Reserved Word
-19 c Identifier
+19 cd Identifier
 19 = Attribuition Operator
 19 4 Number
 19 ; Delimiter
 20 int Reserved Word
-20 d Identifier
+20 df Identifier
 20 = Attribuition Operator
 20 2 Number
 20 ; Delimiter
 21 int Reserved Word
-21 c Identifier
+21 cad Identifier
 21 [ Delimiter
 21 a Identifier
 21 ] Delimiter
@@ -62,7 +62,7 @@ Lista de Tokens:
 21 ] Delimiter
 21 ; Delimiter
 22 int Reserved Word
-22 b Identifier
+22 bf Identifier
 22 [ Delimiter
 22 c Identifier
 22 ] Delimiter
@@ -181,7 +181,7 @@ Lista de Tokens:
 55 ; Delimiter
 56 } Delimiter
 58 procedure Reserved Word
-58 a Identifier
+58 c Identifier
 58 ( Delimiter
 58 int Reserved Word
 58 p Identifier
