@@ -330,7 +330,7 @@ class SyntaticalAnalyzer {
   parseStruct() {
     if (this.consume("typedef")) {
       if (this.consume("struct")) {
-        let data = { identifier: this.currentLexeme }
+        let data = { identifier: this.currentLexeme, args: [], extends: null, line: this.currentLine }
         if (this.consume("Identifier", true)) {
           this.parseStructExtends(data);
         } else {
@@ -363,7 +363,15 @@ class SyntaticalAnalyzer {
       data.extends = this.currentLexeme;
       if (this.consume("Identifier", true)) {
         if (this.consume("{")) {
-          this.parseTypeStruct(data);
+          if(this.semantic.has(data.extends, 'global', ['struct']))  {
+            this.parseTypeStruct(data);
+          } else {
+            this.semantic.appendError({ 
+              error: 'Struct can\'t extends from undefined', 
+              expected: data.extends, 
+              line: this.currentLine
+            })
+          }
         }
       } else {
         this.handleError("extends or {", this.currentLexeme, this.currentLine);
@@ -393,15 +401,17 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseTypeStruct() {
+  parseTypeStruct(data) {
+    let currentArg = { type: this.currentLexeme };
     if (this.consumeType(true)) {
-      this.parseStructExpression();
+      this.parseStructExpression(data, currentArg);
     }
   }
 
-  parseStructExpression() {
+  parseStructExpression(data, currentArg) {
+    currentArg.identifier = this.currentLexeme;
     if (this.consume("Identifier", true)) {
-      this.parseStructContinuation();
+      this.parseStructContinuation(data, currentArg);
     } else {
       this.handleError("Identifier or int, boolean, string, real", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("struct"));
@@ -415,11 +425,21 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseStructContinuation() {
+  parseStructContinuation(data, currentArg) {
+    if (data.args.filter((el) => el.identifier === currentArg.identifier).length == 0) {
+      data.args.push(currentArg);
+    } else {
+      this.semantic.appendError({
+        error: "Attribute already exists in struct context",
+        received: currentArg.identifier,
+        line: this.currentLine
+      })
+    }
+
     if (this.consume(",")) {
-      this.parseStructExpression();
+      this.parseStructExpression(data, currentArg);
     } else if (this.consume(";")) {
-      this.parseStructTermination();
+      this.parseStructTermination(data);
     } else {
       this.handleError(", or ;", this.currentLexeme, this.currentLine);
       this.sync(this.followSets("typeStruct"));
@@ -441,12 +461,13 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseStructTermination() {
+  parseStructTermination(data) {
     if (this.consume("}")) {
+      this.semantic.insertGlobal('struct', data.identifier, data)
       this.parseStruct();
       return;
     } else if (this.checkType()) {
-      this.parseTypeStruct();
+      this.parseTypeStruct(data);
       return;
     } else {
       this.handleError("}", this.currentLexeme, this.currentLine);

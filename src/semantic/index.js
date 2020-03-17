@@ -47,7 +47,7 @@ class SemanticAnalyzer {
   }
 
   showErrors () {
-    console.table(this.global.const)
+    console.table(this.global.struct.get('o'))
     console.table(this.errors)
   }
 }

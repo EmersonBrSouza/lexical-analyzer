@@ -4,15 +4,17 @@ const {
   string c 2;
 }
 
-typedef struct o extends b{
-  int b;
-  int a;
-}
-
 typedef struct a{
   int b;
   int a;
 }
+
+typedef struct o extends a{
+  int b;
+  int c;
+}
+
+
 
 var {
   int c = 4;
