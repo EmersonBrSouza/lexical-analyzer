@@ -13,6 +13,7 @@ class SemanticAnalyzer {
         context: new Map()
       }
     }
+    this.currentAttribution = []
   }
 
   checkType (type, value) {
@@ -55,6 +56,18 @@ class SemanticAnalyzer {
     }
 
     return false
+  }
+
+
+  prepareAttribution (expression) {
+    this.currentAttribution.push(expression)
+  }
+
+  validateAttribution () {
+    let scope = this.currentAttribution.pop();
+    let accessor = this.currentAttribution.pop();
+    let operator =  this.currentAttribution.pop();
+    let value = this.currentAttribution.pop();
   }
 
   insertLocal (family, scopeId, key, data) {

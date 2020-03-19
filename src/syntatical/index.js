@@ -980,10 +980,12 @@ class SyntaticalAnalyzer {
   // Relative to Identificador2
   parseIdentifierAccess() {
     if (this.consume(".")) {
+      // Checar se o atributo da struct existe
       if (this.consume("Identifier", true)) {
         this.parseVectorDeclaration();
       }
-    } else if (this.consume("[")) {
+    } else if (this.check("[")) {
+      // Checar se é um vetor
       this.parseVectorDeclaration();
     } else if (this.check('Identifier', true)){
       this.nextToken();
@@ -1006,6 +1008,7 @@ class SyntaticalAnalyzer {
   // Relative to Vetor2
   parseVectorNewDimension() {
     if (this.consume("[")) {
+      // Checar se é uma matriz
       if (this.consumeVectorIndex()) {
         if (this.consume("]")) {
           this.parseVectorNewDimension();
@@ -1042,13 +1045,20 @@ class SyntaticalAnalyzer {
   }
 
   parseIdentifierWithoutFunction() {
+    let scope = { scope: 'local', identifier: null, hasAccessorModifier: false }
     if (this.matchFirstSet(this.currentLexeme, "scope")) {
+      scope.scope = this.currentLexeme;
       this.parseScope()
+      scope.identifier = this.currentLexeme;
+      scope.hasAccessorModifier = true;
       if (this.consume("Identifier", true)) {
         this.parseIdentifierAccess();
+        return scope;
       }
     } else if (this.check("Identifier", true)) {
+      scope.identifier = this.currentLexeme;
       this.parseIdentifierAccess();
+      return scope;
     }
   }
 
@@ -1432,12 +1442,13 @@ class SyntaticalAnalyzer {
   parseIdentifierCommands() {
     if (
       this.check("String", true) ||
-      this.check("Number") ||
+      this.check("Number", true) ||
       this.check("Identifier", true) ||
       this.matchFirstSet(this.currentLexeme, "scope")
     ) {
+      let data = { lexeme: this.currentLexeme, token: this.currentToken, expectedType: '' };
       this.parseIdentifierWithoutFunction();
-      this.parseIdentifierCommands2();
+      this.parseIdentifierCommands2(data);
       if (this.consume(";")) {
         return;
       } else {
@@ -1453,9 +1464,9 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseIdentifierCommands2() {
+  parseIdentifierCommands2(data) {
     if (this.consume("=")) {
-      this.parseIdentifierCommands2_1();
+      this.parseIdentifierCommands2_1(data);
     } else if (this.consume("(")) {
       this.parseParametersList();
       if (this.consume(")")) {
@@ -1472,8 +1483,14 @@ class SyntaticalAnalyzer {
     }
   }
 
-  parseIdentifierCommands2_1() {
+  parseIdentifierCommands2_1(data) {
     if (this.check("String", true) || this.check("Number", true) || this.check("true") || this.check("false")) {
+      if (data.token == 'Identifier') {
+        if (this.semantic.has(data.lexeme, 'global', ['function', 'var', 'const'])) {
+          let found = this.semantic.get(data.lexeme, 'global', ['function', 'var', 'const']);
+          if (this.checkType())
+        }
+      }
       this.consume(this.currentLexeme)
     } else if (
       this.matchFirstSet(this.currentLexeme, "arithmetic_expression") ||
