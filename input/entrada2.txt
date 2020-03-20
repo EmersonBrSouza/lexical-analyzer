@@ -4,12 +4,12 @@ const {
   real c 3;
 }
 
-typedef struct a{
+typedef struct cde{
   int b1;
   int a2;
 }
 
-typedef struct o extends a{
+typedef struct o extends cde{
   int b;
   int cc;
 }
@@ -25,10 +25,10 @@ var {
 
 function int a (int a, real o[][]) {
   var {
-    int b = c;
+    int b = "c";
   }
-  
-  local.a(a, d , d);
+
+  a(a, d , d);
   print (aa);
   read (pp,m);
 
@@ -57,7 +57,7 @@ function int a (int a, real o[][]) {
 
 procedure c (int p) {
   var {
-    int b = c;
+    int b = "o";
   }
   
   local.a(a, d , d);
@@ -84,7 +84,7 @@ start () {
     int b[3];
   }
   
-  local.a(a, 2 , "d");
+  a(a, 2 , "d");
   print (aa);
 
   print("a");

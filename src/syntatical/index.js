@@ -13,6 +13,36 @@ class SyntaticalAnalyzer {
     this.currentLine = this.tokens[this.tokenPointer].line;
     this.firstSet = [];
     this.errors = [];
+    this.context = {
+      parentRef: {
+        identifier: '',
+        family: ''
+      },
+      query: {
+        scopes: {
+          primary: '',
+          secondary: ''
+        }
+      }
+    };
+    this.accessor = {
+      scope: '',
+      identifier: '',
+      append: [],
+      parameters: []
+    }
+    this.arrayArgs = { firstIndex: null, secondIndex: null }
+    this.structArgs = {
+      identifier: null,
+      hasArray: false,
+      arrayArgs: null
+    }
+    this.currentParameter = {
+      value: '',
+      identifier: '',
+      scope: ''
+    }
+    this.attribution = { isIdentifier: false, value: '' }
     this.mountFirstSets();
   }
 
@@ -895,7 +925,6 @@ class SyntaticalAnalyzer {
           })
         }
       } else if (scope == "local") {
-        console.log("EITA BIXO, ARRAY LOCALLL")
         if (!this.semantic.hasLocal(parentFamily, functionName, varName)) {
           this.semantic.insertLocal(parentFamily, functionName, varName, {
             family: 'var',
@@ -956,12 +985,16 @@ class SyntaticalAnalyzer {
   }
 
   parseIdentifier() {
+    let identifier = this.currentLexeme;
     if (this.matchFirstSet(this.currentLexeme, "scope")) {
       this.parseScope();
+      identifier = this.currentLexeme;
       if (this.consume("Identifier", true)) {
+        this.accessor.identifier = identifier;
         this.parseIdentifierAccess();
       }
     } else if (this.consume("Identifier", true)) {
+      this.accessor.identifier = identifier;
       this.parseIdentifierAppendix();
     }
   }
@@ -980,57 +1013,75 @@ class SyntaticalAnalyzer {
   // Relative to Identificador2
   parseIdentifierAccess() {
     if (this.consume(".")) {
-      // Checar se o atributo da struct existe
+      let structIdentifier = this.currentLexeme;
       if (this.consume("Identifier", true)) {
-        this.parseVectorDeclaration();
+        this.structArgs.identifier = structIdentifier;
+        this.parseVectorDeclaration("struct");
       }
     } else if (this.check("[")) {
-      // Checar se é um vetor
-      this.parseVectorDeclaration();
+      this.parseVectorDeclaration("array");
     } else if (this.check('Identifier', true)){
       this.nextToken();
     }
   }
 
-  parseVectorDeclaration() {
+  parseVectorDeclaration(from) {
     if (this.consume("[")) {
+      let currentIndex = this.currentLexeme;
       if (this.consumeVectorIndex()) {
+        if (from == 'struct') {
+          this.structArgs.hasArray = true;
+        }
+        this.arrayArgs.firstIndex = currentIndex;
         if (this.consume("]")) {
           this.parseVectorNewDimension();
-          this.parseVectorAccess();
+          this.parseVectorAccess(from);
         }
       }
     } else if (this.consume(".")) {
-      this.parseVectorAccess();
+      this.parseVectorAccess(from);
     }
   }
 
   // Relative to Vetor2
-  parseVectorNewDimension() {
+  parseVectorNewDimension(from) {
     if (this.consume("[")) {
-      // Checar se é uma matriz
+      let currentIndex = this.currentLexeme;
       if (this.consumeVectorIndex()) {
+        this.accessor.arrayArgs.secondIndex = currentIndex;
         if (this.consume("]")) {
-          this.parseVectorNewDimension();
-          this.parseVectorAccess();
+          this.parseVectorNewDimension(from);
+          this.parseVectorAccess(from);
         }
       }
     }
   }
 
   // Relative to Identificador 4
-  parseVectorAccess() {
+  parseVectorAccess(from) {
+    if (from == 'struct') {
+      this.structArgs.arrayArgs = this.arrayArgs
+      this.accessor.append.push(this.structArgs)
+    } else if (from == 'array') {
+      this.accessor.append.push(this.arrayArgs)
+    }
+    console.log(this.accessor);
     if (this.consume(".")) {
+      let structIdentifier = this.currentLexeme;
       if (this.consume("Identifier", true)) {
-        this.parseVectorDeclaration();
+        this.structArgs.identifier = structIdentifier;
+        this.parseVectorDeclaration("struct");
       }
     }
   }
 
   parseScope() {
+    this.accessor.scope = 'free';
     if (this.matchFirstSet(this.currentLexeme, "scope")) {
+      let currentScope = this.currentLexeme;
       if (this.consume(this.currentLexeme)) {
         if (this.consume(".")) {
+          this.accessor.scope = currentScope;
           return;
         } else {
           this.handleError('.', this.currentLexeme, this.currentLine)
@@ -1045,20 +1096,15 @@ class SyntaticalAnalyzer {
   }
 
   parseIdentifierWithoutFunction() {
-    let scope = { scope: 'local', identifier: null, hasAccessorModifier: false }
     if (this.matchFirstSet(this.currentLexeme, "scope")) {
-      scope.scope = this.currentLexeme;
       this.parseScope()
-      scope.identifier = this.currentLexeme;
-      scope.hasAccessorModifier = true;
+      let currentAccessor = this.currentLexeme;
       if (this.consume("Identifier", true)) {
+        this.accessor.identifier = currentAccessor;
         this.parseIdentifierAccess();
-        return scope;
       }
     } else if (this.check("Identifier", true)) {
-      scope.identifier = this.currentLexeme;
       this.parseIdentifierAccess();
-      return scope;
     }
   }
 
@@ -1485,12 +1531,6 @@ class SyntaticalAnalyzer {
 
   parseIdentifierCommands2_1(data) {
     if (this.check("String", true) || this.check("Number", true) || this.check("true") || this.check("false")) {
-      if (data.token == 'Identifier') {
-        if (this.semantic.has(data.lexeme, 'global', ['function', 'var', 'const'])) {
-          let found = this.semantic.get(data.lexeme, 'global', ['function', 'var', 'const']);
-          if (this.checkType())
-        }
-      }
       this.consume(this.currentLexeme)
     } else if (
       this.matchFirstSet(this.currentLexeme, "arithmetic_expression") ||
@@ -1831,6 +1871,11 @@ class SyntaticalAnalyzer {
       })
     }
     if (this.consume("{")) {
+      this.context.parentRef.family = data.family;
+      this.context.parentRef.identifier = data.identifier;
+      this.context.query.scopes.primary = 'local';
+      this.context.query.scopes.secondary = 'global';
+
       this.parseBody(data.identifier, data.family);
     } else {
       this.handleError("{", this.currentLexeme, this.currentLine);
