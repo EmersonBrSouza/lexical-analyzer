@@ -62,7 +62,7 @@ class Transition {
 
   static q5 (destiny, args) {
     if (destiny == "q5") {
-      return Comparator.isDigit(args)
+      return Comparator.isDigit(args) || args === "."
     } else if (destiny == "q6") {
       return args === "."
     }

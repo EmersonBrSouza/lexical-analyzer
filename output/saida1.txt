@@ -1,9 +1,4 @@
-----------------------------------------------------------------------
-
 Lista de Tokens:
-
-Lista de Erros Sintáticos:
-
 ----------------------------------------------------------------------
 
 1 const Reserved Word
@@ -18,7 +13,7 @@ Lista de Erros Sintáticos:
 3 ; Delimiter
 4 real Reserved Word
 4 d Identifier
-4 9 Number
+4 9.0 Number
 4 ; Delimiter
 5 } Delimiter
 7 var Reserved Word
@@ -49,5 +44,10 @@ Lista de Erros Sintáticos:
 
 
 Lista de Erros Léxicos:
+----------------------------------------------------------------------
+
+
+Lista de Erros Sintáticos:
+
 ----------------------------------------------------------------------
 

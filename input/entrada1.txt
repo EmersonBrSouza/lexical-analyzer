@@ -1,7 +1,7 @@
 const {
   int a 3;
   int a 4;
-  real d 9;
+  real d 9.0;
 }
 
 var {
