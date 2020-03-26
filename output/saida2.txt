@@ -1,16 +1,11 @@
 Lista de Tokens:
 ----------------------------------------------------------------------
 
-
-Lista de Erros Sintáticos:
-
-----------------------------------------------------------------------
-
 1 const Reserved Word
 1 { Delimiter
 2 int Reserved Word
 2 a Identifier
-2 2.0 Number
+2 2 Number
 2 ; Delimiter
 3 boolean Reserved Word
 3 d Identifier
@@ -310,5 +305,10 @@ Lista de Erros Sintáticos:
 
 
 Lista de Erros Léxicos:
+----------------------------------------------------------------------
+
+
+Lista de Erros Sintáticos:
+
 ----------------------------------------------------------------------
 

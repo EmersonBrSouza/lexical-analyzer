@@ -184,7 +184,6 @@ class SyntaticalAnalyzer {
   }
 
   startAnalisys() {
-    // console.table(this.tokens)
     this.parseConst();
     this.parseStruct();
     this.parseVar();
