@@ -90,8 +90,24 @@ class SemanticAnalyzer {
   }
 
   showErrors () {
-    console.log(this.global.function.get('a'))
-    console.table(this.errors)
+    if (this.errors.length == 0) {
+      console.log("A análise sintática não encontrou erros! \n")
+    } else {
+      console.table(this.errors)
+    }
+    this.writeFile()
+  }
+
+  writeFile () {
+    let filenumber = this.filename.split('entrada').join('').split('.txt')[0];
+    const logger = fs.createWriteStream(path.resolve("output", `saida${filenumber}.txt`), { flags: 'a' })
+    logger.write(`----------------------------------------------------------------------\n\n`)
+    logger.write(`\nLista de Erros Semânticos:\n\n`)
+    this.errors.forEach(error => {
+      logger.write(`${error.line} ${ error.error }${error.expected} ${error.received}\n`)
+    });
+    logger.write(`----------------------------------------------------------------------\n\n`)
+    logger.end();
   }
 }
 
