@@ -57,7 +57,7 @@ function int a (int a, real o[][]) {
 
 procedure c (int p) {
   var {
-    int b = "o";
+    int b = o;
   }
   
   local.a(a, d , d);

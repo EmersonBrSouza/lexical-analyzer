@@ -90,7 +90,7 @@ class SemanticAnalyzer {
   }
 
   showErrors () {
-    console.log(this.global.start.context)
+    console.log(this.global.function.get('a'))
     console.table(this.errors)
   }
 }

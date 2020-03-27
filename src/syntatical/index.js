@@ -681,14 +681,42 @@ class SyntaticalAnalyzer {
           }
         } else if (scope == "local") {
           if (!this.semantic.hasLocal(parentFamily, functionName, varName)) {
-            this.semantic.insertLocal(parentFamily, functionName, varName, {
-              family: 'var',
-              token: 'Identifier',
-              lexeme: varName,
-              type: currentType,
-              value: value.lexeme,
-              line: this.currentLine
-            })
+            if (value.token == 'Identifier') {
+              if (this.semantic.has(value.lexeme, 'global', ['const', 'var'])) {
+                this.semantic.insertLocal(parentFamily, functionName, varName, {
+                  family: 'var',
+                  token: 'Identifier',
+                  lexeme: varName,
+                  type: currentType,
+                  value: value.lexeme,
+                  line: this.currentLine
+                })
+              } else {
+                this.semantic.appendError({
+                  error: 'Undefined Variable or Const',
+                  expected: value.lexeme,
+                  line: this.currentLine
+                })
+              }
+            } else {
+              if (this.semantic.checkType(currentType, value.lexeme)) {
+                this.semantic.insertLocal(parentFamily, functionName, varName, {
+                  family: 'var',
+                  token: 'Identifier',
+                  lexeme: varName,
+                  type: currentType,
+                  value: value.lexeme,
+                  line: this.currentLine
+                })
+              } else {
+                this.semantic.appendError({
+                  error: 'Invalid Type',
+                  expected: currentType,
+                  received: value.lexeme,
+                  line: this.currentLine
+                })
+              }
+            }
           } else {
             this.semantic.appendError({
               error: 'Const or Var already exists in function scope',

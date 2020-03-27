@@ -190,7 +190,7 @@ Lista de Tokens:
 60 int Reserved Word
 60 b Identifier
 60 = Attribuition Operator
-60 "o" String
+60 o Identifier
 60 ; Delimiter
 61 } Delimiter
 63 local Reserved Word
